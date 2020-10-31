@@ -19,11 +19,15 @@ class ShowRidingLessonsViewModel @ViewModelInject constructor(
 ) : ViewModel() {
 
     val ridingLessonItems = MutableStateFlow(emptyList<RidingLessonParentItem>())
+    val ridingLessonDayName = MutableStateFlow("")
 
 
     init {
         viewModelScope.launch {
             ridingLessonRepository.getRidingLessonDays().doOn({ dto ->
+
+                ridingLessonDayName.value = dto.ridingLessonDayDtos.first().weekday.name
+
                 ridingLessonItems.value = dto.ridingLessonDayDtos.map { dayDto ->
                     RidingLessonParentItem(
                         dayDto.ridingLessons.map { RidingLessonChildItem((it.title)) }
