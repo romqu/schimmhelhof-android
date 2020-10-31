@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/ridinglessonsFragment">
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="de.romqu.schimmelhof_android.presentation.login.LoginFragment"
+        android:label="LoginFragment" />
+
+    <fragment
+        android:id="@+id/ridinglessonsFragment"
+        android:name="de.romqu.schimmelhof_android.presentation.ridinglessonlist.ShowRidingLessonsFragment"
+        android:label="LoginFragment" />
+</navigation>

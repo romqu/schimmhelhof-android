@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package data;
+
+option java_package = "de.romqu.schimmelhof_android.data";
+option java_multiple_files = true;
+
+import "WeekdayDto.proto";
+import "RidingLessonDto.proto";
+import "LocalDateDto.proto";
+
+message RidingLessonDayDto {
+  WeekdayDto weekday = 1;
+  LocalDateDto date = 2;
+  repeated RidingLessonDto ridingLessons = 3;
+}
