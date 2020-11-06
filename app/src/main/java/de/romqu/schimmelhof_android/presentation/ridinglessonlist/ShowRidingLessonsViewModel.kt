@@ -39,4 +39,8 @@ class ShowRidingLessonsViewModel @ViewModelInject constructor(
         }
     }
 
+    fun onNextPage(position: Int){
+
+    }
+
 }

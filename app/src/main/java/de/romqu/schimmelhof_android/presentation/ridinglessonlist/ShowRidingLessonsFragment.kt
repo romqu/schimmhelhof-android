@@ -18,6 +18,7 @@ import de.romqu.schimmelhof_android.databinding.FragmentShowRidingLessonsBinding
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.child.RidingLessonChildItem
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonParentItem
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonParentListAdapter
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.util.attachSnapHelperWithListener
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
@@ -60,7 +61,11 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
             adapter = lessonsAdapter
         }
 
-        PagerSnapHelper().attachToRecyclerView(binding.ridingLessonDayParentRcv)
+        val pagerSnapHelper = PagerSnapHelper()
+        pagerSnapHelper.attachToRecyclerView(binding.ridingLessonDayParentRcv)
+        binding.ridingLessonDayParentRcv.attachSnapHelperWithListener(pagerSnapHelper) {position ->
+            viewModel.onNextPage()
+        }
 
         lifecycleScope.launchWhenCreated {
             viewModel.ridingLessonItems.collect {

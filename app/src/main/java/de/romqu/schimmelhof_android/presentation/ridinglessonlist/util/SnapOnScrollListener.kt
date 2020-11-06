@@ -1,4 +1,4 @@
-package de.romqu.schimmelhof_android.presentation.ridinglessonlist
+package de.romqu.schimmelhof_android.presentation.ridinglessonlist.util
 
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
@@ -40,7 +40,7 @@ class SnapOnScrollListener(
     }
 }
 
-interface OnSnapPositionChangeListener {
+fun interface OnSnapPositionChangeListener {
 
     fun onSnapPositionChange(position: Int)
 }
@@ -53,7 +53,7 @@ fun SnapHelper.getSnapPosition(recyclerView: RecyclerView): Int {
 
 fun RecyclerView.attachSnapHelperWithListener(
     snapHelper: SnapHelper,
-    behavior: SnapOnScrollListener.Behavior = SnapOnScrollListener.Behavior.NOTIFY_ON_SCROLL,
+    behavior: SnapOnScrollListener.Behavior = SnapOnScrollListener.Behavior.NOTIFY_ON_SCROLL_STATE_IDLE,
     onSnapPositionChangeListener: OnSnapPositionChangeListener,
 ) {
     snapHelper.attachToRecyclerView(this)
