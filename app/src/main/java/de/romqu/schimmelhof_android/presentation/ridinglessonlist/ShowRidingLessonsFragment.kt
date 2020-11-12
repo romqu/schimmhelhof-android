@@ -21,6 +21,7 @@ import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingL
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.util.attachSnapHelperWithListener
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -30,14 +31,14 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
     private var _binding: FragmentShowRidingLessonsBinding? = null
     private val binding get() = _binding!!
 
-    private val lessonsAdapter  by lazy {
+    private val lessonsAdapter by lazy {
         RidingLessonParentListAdapter(
             mutableListOf(),
             RecyclerView.RecycledViewPool()
         )
     }
 
-    val viewModel by viewModels<ShowRidingLessonsViewModel>()
+    private val viewModel by viewModels<ShowRidingLessonsViewModel>()
 
 
     override fun onCreateView(
@@ -63,13 +64,39 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
 
         val pagerSnapHelper = PagerSnapHelper()
         pagerSnapHelper.attachToRecyclerView(binding.ridingLessonDayParentRcv)
-        binding.ridingLessonDayParentRcv.attachSnapHelperWithListener(pagerSnapHelper) {position ->
-            viewModel.onNextPage()
+
+        binding.ridingLessonDayParentRcv.attachSnapHelperWithListener(pagerSnapHelper) { position ->
+            viewModel.onNextPage(position)
         }
 
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launch {
+            viewModel.ridingLessonDayName.collect {
+                binding.ridingLessonDayTextView.text = it
+            }
+        }
+
+        lifecycleScope.launch {
             viewModel.ridingLessonItems.collect {
                 lessonsAdapter.updateData(it)
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.hideInitialLoading.collect {
+                binding.shimmerViewContainer.hideShimmer()
+                binding.shimmerViewContainer.visibility = View.GONE
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.showList.collect {
+                binding.ridingLessonDayParentRcv.visibility = View.VISIBLE
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.showDayName.collect {
+                binding.ridingLessonDayTextView.visibility = View.VISIBLE
             }
         }
     }

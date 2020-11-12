@@ -12,6 +12,7 @@ import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import de.romqu.schimmelhof_android.R
@@ -60,6 +61,12 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 .collect {
                     binding.root.hideKeyboard()
                 }
+        }
+
+        lifecycleScope.launch {
+            viewModel.goToRidingLessons.collect {
+                findNavController().navigate(R.id.ridingLessonsFragment)
+            }
         }
 
         binding.usernameEditText.doOnTextChanged { text, _, _, _ ->

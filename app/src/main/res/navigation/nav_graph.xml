@@ -2,15 +2,21 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/ridinglessonsFragment">
+    app:startDestination="@id/ridingLessonsFragment">
 
     <fragment
         android:id="@+id/loginFragment"
         android:name="de.romqu.schimmelhof_android.presentation.login.LoginFragment"
-        android:label="LoginFragment" />
+        android:label="LoginFragment" >
+        <action
+            android:id="@+id/action_loginFragment_to_ridinglessonsFragment"
+            app:destination="@id/ridingLessonsFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
 
     <fragment
-        android:id="@+id/ridinglessonsFragment"
+        android:id="@+id/ridingLessonsFragment"
         android:name="de.romqu.schimmelhof_android.presentation.ridinglessonlist.ShowRidingLessonsFragment"
-        android:label="LoginFragment" />
+        android:label="RidingLessonsFragment" />
 </navigation>

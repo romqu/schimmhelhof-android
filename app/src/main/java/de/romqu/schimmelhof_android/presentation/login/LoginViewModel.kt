@@ -28,6 +28,7 @@ class LoginViewModel @ViewModelInject constructor(
 
     val errorMessage = MutableSharedFlow<String>()
     val closeKeyboard = MutableSharedFlow<Unit>()
+    val goToRidingLessons = MutableSharedFlow<Unit>()
 
     val isLoginButtonEnabled = usernameTextState
         .combine(plainPasswordTextState) { usernameText, plainPasswordText ->
@@ -57,7 +58,9 @@ class LoginViewModel @ViewModelInject constructor(
         loginService.execute(
             username = usernameTextState.value,
             plainPassword = plainPasswordTextState.value
-        ).doOn({}, {
+        ).doOn({
+            goToRidingLessons.emit(Unit)
+        }, {
             errorMessage.emit("Da stimmen wohl die Daten nich, wa?")
         })
     }

@@ -9,7 +9,7 @@ import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonRepository
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.child.RidingLessonChildItem
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonParentItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
@@ -19,28 +19,56 @@ class ShowRidingLessonsViewModel @ViewModelInject constructor(
 ) : ViewModel() {
 
     val ridingLessonItems = MutableStateFlow(emptyList<RidingLessonParentItem>())
-    val ridingLessonDayName = MutableStateFlow("")
+    private val pagePosition = MutableStateFlow(0)
+
+    private val error = MutableSharedFlow<Error>(1).apply {
+        tryEmit(Error.DEFAULT)
+    }
+
+    val showErrorMessage = error.drop(1).map { it.toString() }
+
+    val showEmptyListMessage = ridingLessonItems.drop(1).filter { it.isEmpty() }
+
+    val hideInitialLoading = combine(ridingLessonItems, error) { items, error ->
+        (items.isNotEmpty() && error == Error.NONE) || error != Error.NONE
+    }.drop(1).filter { it }.debounce(1500)
+
+    val showList = hideInitialLoading
+
+    val showDayName = hideInitialLoading
+
+    val ridingLessonDayName = ridingLessonItems.drop(1).combine(pagePosition) { items, position ->
+        items[position].dayOfWeekName
+    }
 
 
     init {
+        getRidingLessonsDays()
+    }
+
+    private fun getRidingLessonsDays() {
         viewModelScope.launch {
             ridingLessonRepository.getRidingLessonDays().doOn({ dto ->
 
-                ridingLessonDayName.value = dto.ridingLessonDayDtos.first().weekday.name
-
                 ridingLessonItems.value = dto.ridingLessonDayDtos.map { dayDto ->
                     RidingLessonParentItem(
+                        dayDto.weekday.name,
                         dayDto.ridingLessons.map { RidingLessonChildItem((it.title)) }
                     )
                 }
-            }, {
-
+            }, { apiError ->
+                error.emit(Error.DEFAULT)
             })
         }
     }
 
-    fun onNextPage(position: Int){
+    fun onNextPage(position: Int) {
+        pagePosition.value = position
+    }
 
+    sealed class Error {
+        object NONE : Error()
+        object DEFAULT : Error()
     }
 
 }
