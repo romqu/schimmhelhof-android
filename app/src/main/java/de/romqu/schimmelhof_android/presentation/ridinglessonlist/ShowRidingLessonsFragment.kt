@@ -10,19 +10,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SnapHelper
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import de.romqu.schimmelhof_android.R
-import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonRepository
 import de.romqu.schimmelhof_android.databinding.FragmentShowRidingLessonsBinding
-import de.romqu.schimmelhof_android.presentation.ridinglessonlist.child.RidingLessonChildItem
-import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonParentItem
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonParentListAdapter
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.util.attachSnapHelperWithListener
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 @ExperimentalCoroutinesApi
@@ -36,6 +32,10 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
             mutableListOf(),
             RecyclerView.RecycledViewPool()
         )
+    }
+
+    private val networkDisconnectedSnackbar by lazy {
+        Snackbar.make(binding.root, "", Snackbar.LENGTH_INDEFINITE)
     }
 
     private val viewModel by viewModels<ShowRidingLessonsViewModel>()
@@ -97,6 +97,18 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
         lifecycleScope.launch {
             viewModel.showDayName.collect {
                 binding.ridingLessonDayTextView.visibility = View.VISIBLE
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.showNetworkDisconnectedMessage.collect {
+                networkDisconnectedSnackbar.setText(it).show()
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.dismissNetworkDisconnectedMessage.collect {
+                networkDisconnectedSnackbar.dismiss()
             }
         }
     }

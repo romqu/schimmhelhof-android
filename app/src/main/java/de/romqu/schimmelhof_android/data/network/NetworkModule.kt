@@ -6,6 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ApplicationComponent
 import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonApiDataSource
 import de.romqu.schimmelhof_android.data.user.UserApiDataSource
+import kotlinx.coroutines.flow.MutableSharedFlow
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
@@ -18,7 +19,7 @@ class NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(
-        tokenHeaderInterceptor: TokenHeaderInterceptor
+        tokenHeaderInterceptor: TokenHeaderInterceptor,
     ): OkHttpClient = OkHttpClient
         .Builder()
         .addInterceptor(tokenHeaderInterceptor)
@@ -43,4 +44,15 @@ class NetworkModule {
     @Singleton
     fun provideRidingLessonApiService(retrofit: Retrofit): RidingLessonApiDataSource =
         retrofit.create(RidingLessonApiDataSource::class.java)
+
+    @Provides
+    @Singleton
+    fun provideNetworkConnectivityEmitter(): MutableSharedFlow<NetworkConnectivityState> =
+        MutableSharedFlow(replay = 1)
+
+    enum class NetworkConnectivityState {
+        CONNECTED,
+        DISCONNECTED,
+    }
+
 }

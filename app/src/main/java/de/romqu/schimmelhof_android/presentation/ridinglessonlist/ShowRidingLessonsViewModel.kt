@@ -5,8 +5,8 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import de.romqu.schimmelhof_android.data.network.NetworkModule
 import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonRepository
-import de.romqu.schimmelhof_android.presentation.ridinglessonlist.child.RidingLessonChildItem
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonParentItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 @ExperimentalCoroutinesApi
 class ShowRidingLessonsViewModel @ViewModelInject constructor(
     private val ridingLessonRepository: RidingLessonRepository,
+    private val networkConnectivityListener: MutableSharedFlow<NetworkModule.NetworkConnectivityState>,
     @Assisted private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -33,6 +34,13 @@ class ShowRidingLessonsViewModel @ViewModelInject constructor(
 
     val showErrorMessage = error.drop(1).map { it.toString() }
 
+    val showNetworkDisconnectedMessage = networkConnectivityListener
+        .filter { it == NetworkModule.NetworkConnectivityState.DISCONNECTED }
+        .map { "No Network" }
+
+    val dismissNetworkDisconnectedMessage = networkConnectivityListener
+        .filter { it == NetworkModule.NetworkConnectivityState.CONNECTED }
+
     val hideInitialLoading = combine(ridingLessonItems, error) { items, error ->
         error != Error.NONE
     }.drop(1).filter { it }.debounce(1500)
@@ -41,7 +49,8 @@ class ShowRidingLessonsViewModel @ViewModelInject constructor(
 
     val showDayName = hideInitialLoading
 
-    val ridingLessonDayName = ridingLessonItems.drop(1).filter { it.isNotEmpty() }.combine(pagePosition) { items, position ->
+    val ridingLessonDayName = ridingLessonItems.drop(1).filter { it.isNotEmpty() }
+        .combine(pagePosition) { items, position ->
         items[position].dayOfWeekName
     }
 
