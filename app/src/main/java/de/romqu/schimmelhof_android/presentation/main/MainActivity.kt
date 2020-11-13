@@ -24,6 +24,11 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var connectivityEmitter: MutableSharedFlow<NetworkModule.NetworkConnectivityState>
 
+    private val connectivityManager by lazy {
+        getSystemService(Context.CONNECTIVITY_SERVICE)
+                as ConnectivityManager
+    }
+
     private val navController by lazy {
         findNavController(R.id.nav_host_fragment)
     }
@@ -43,19 +48,28 @@ class MainActivity : AppCompatActivity() {
             setupInitialDestination()
         }
 
-        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE)
-                as ConnectivityManager
+
+        // TODO: Move to main view model or similar
+        connectivityManager.activeNetwork?.run {
+            connectivityEmitter.tryEmit(NetworkModule.NetworkConnectivityState.CONNECTED)
+        } ?: connectivityEmitter.tryEmit(NetworkModule.NetworkConnectivityState.DISCONNECTED)
 
         connectivityManager.registerDefaultNetworkCallback(object :
             ConnectivityManager.NetworkCallback() {
+
             override fun onAvailable(network: Network) {
                 connectivityEmitter.tryEmit(NetworkModule.NetworkConnectivityState.CONNECTED)
             }
 
             override fun onLost(network: Network) {
-                connectivityEmitter.tryEmit(NetworkModule.NetworkConnectivityState.DISCONNECTED)
+
+                if (connectivityManager.allNetworks.isEmpty()) {
+                    connectivityEmitter.tryEmit(NetworkModule.NetworkConnectivityState.DISCONNECTED)
+                }
+
             }
         })
+
     }
 
     private suspend fun setupInitialDestination() {
