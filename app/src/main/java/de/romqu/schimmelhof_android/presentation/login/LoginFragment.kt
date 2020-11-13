@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
@@ -92,8 +93,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
     }
 
     private fun View.hideKeyboard() {
-        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE)
-                as InputMethodManager
-        imm.hideSoftInputFromWindow(windowToken, 0)
+        ViewCompat.getWindowInsetsController(this)?.hide(WindowInsetsCompat.Type.ime())
     }
 }

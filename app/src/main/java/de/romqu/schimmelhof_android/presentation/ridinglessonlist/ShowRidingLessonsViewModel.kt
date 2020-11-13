@@ -18,7 +18,13 @@ class ShowRidingLessonsViewModel @ViewModelInject constructor(
     @Assisted private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    val ridingLessonItems = MutableStateFlow(emptyList<RidingLessonParentItem>())
+    val ridingLessonItems = MutableSharedFlow<List<RidingLessonParentItem>>(1).apply {
+        tryEmit(listOf())
+    }
+
+    private val ridingLessonItemsState = ridingLessonItems
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
     private val pagePosition = MutableStateFlow(0)
 
     private val error = MutableSharedFlow<Error>(1).apply {
@@ -27,17 +33,15 @@ class ShowRidingLessonsViewModel @ViewModelInject constructor(
 
     val showErrorMessage = error.drop(1).map { it.toString() }
 
-    val showEmptyListMessage = ridingLessonItems.drop(1).filter { it.isEmpty() }
-
     val hideInitialLoading = combine(ridingLessonItems, error) { items, error ->
-        (items.isNotEmpty() && error == Error.NONE) || error != Error.NONE
+        error != Error.NONE
     }.drop(1).filter { it }.debounce(1500)
 
     val showList = hideInitialLoading
 
     val showDayName = hideInitialLoading
 
-    val ridingLessonDayName = ridingLessonItems.drop(1).combine(pagePosition) { items, position ->
+    val ridingLessonDayName = ridingLessonItems.drop(1).filter { it.isNotEmpty() }.combine(pagePosition) { items, position ->
         items[position].dayOfWeekName
     }
 
@@ -50,12 +54,9 @@ class ShowRidingLessonsViewModel @ViewModelInject constructor(
         viewModelScope.launch {
             ridingLessonRepository.getRidingLessonDays().doOn({ dto ->
 
-                ridingLessonItems.value = dto.ridingLessonDayDtos.map { dayDto ->
-                    RidingLessonParentItem(
-                        dayDto.weekday.name,
-                        dayDto.ridingLessons.map { RidingLessonChildItem((it.title)) }
-                    )
-                }
+                ridingLessonItems.emit(listOf())
+
+
             }, { apiError ->
                 error.emit(Error.DEFAULT)
             })
@@ -70,5 +71,5 @@ class ShowRidingLessonsViewModel @ViewModelInject constructor(
         object NONE : Error()
         object DEFAULT : Error()
     }
-
 }
+
