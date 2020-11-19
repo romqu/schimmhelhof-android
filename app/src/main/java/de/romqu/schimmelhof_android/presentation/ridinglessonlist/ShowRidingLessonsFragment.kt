@@ -15,14 +15,19 @@ import dagger.hilt.android.AndroidEntryPoint
 import de.romqu.schimmelhof_android.R
 import de.romqu.schimmelhof_android.databinding.FragmentShowRidingLessonsBinding
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonParentListAdapter
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.refresh.RefreshLayout
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.util.attachSnapHelperWithListener
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 @ExperimentalCoroutinesApi
 class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
+
+    @Inject
+    lateinit var refreshLayout: RefreshLayout
 
     private var _binding: FragmentShowRidingLessonsBinding? = null
     private val binding get() = _binding!!
@@ -40,7 +45,6 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
 
     private val viewModel by viewModels<ShowRidingLessonsViewModel>()
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -52,6 +56,8 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        refreshLayout.setup(binding, lessonsAdapter)
 
         binding.ridingLessonDayParentRcv.apply {
             layoutManager = LinearLayoutManager(

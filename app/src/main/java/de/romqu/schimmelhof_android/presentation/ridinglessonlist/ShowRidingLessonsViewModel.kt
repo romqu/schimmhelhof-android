@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import de.romqu.schimmelhof_android.data.network.NetworkModule
 import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonRepository
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonParentItem
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.refresh.RefreshRunner
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -16,14 +17,19 @@ import kotlinx.coroutines.launch
 class ShowRidingLessonsViewModel @ViewModelInject constructor(
     private val ridingLessonRepository: RidingLessonRepository,
     private val networkConnectivityListener: MutableSharedFlow<NetworkModule.NetworkConnectivityState>,
+    private val refreshRunner: RefreshRunner,
     @Assisted private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+
+    init {
+        refreshRunner.setup(viewModelScope)
+    }
 
     val ridingLessonItems = MutableSharedFlow<List<RidingLessonParentItem>>(1).apply {
         tryEmit(listOf())
     }
 
-    private val ridingLessonItemsState = ridingLessonItems
+    val ridingLessonItemsState = ridingLessonItems
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val pagePosition = MutableStateFlow(0)
@@ -51,29 +57,38 @@ class ShowRidingLessonsViewModel @ViewModelInject constructor(
 
     val ridingLessonDayName = ridingLessonItems.drop(1).filter { it.isNotEmpty() }
         .combine(pagePosition) { items, position ->
-        items[position].dayOfWeekName
-    }
+            items[position].dayOfWeekName
+        }
 
 
     init {
-        getRidingLessonsDays()
-    }
-
-    private fun getRidingLessonsDays() {
-        viewModelScope.launch {
-            ridingLessonRepository.getRidingLessonDays().doOn({ dto ->
-
-                ridingLessonItems.emit(listOf())
-
-
-            }, { apiError ->
-                error.emit(Error.DEFAULT)
-            })
-        }
+        getRidingLessonDays()
     }
 
     fun onNextPage(position: Int) {
         pagePosition.value = position
+    }
+
+    fun onRefresh() {
+        getRidingLessonDays()
+    }
+
+    private fun getRidingLessonDays() {
+        viewModelScope.launch {
+            ridingLessonRepository.getRidingLessonDays().doOn({ dto ->
+                ridingLessonItems.emit(listOf())
+
+                /*ridingLessonItems.emit(dto.ridingLessonDayDtos.map { dayDto ->
+                    RidingLessonParentItem(
+                        dayDto.weekday.name,
+                        dayDto.ridingLessons.map { RidingLessonChildItem((it.title)) }
+                    ))
+                }*/
+            }, { apiError ->
+                error.emit(Error.DEFAULT)
+            })
+
+        }
     }
 
     sealed class Error {

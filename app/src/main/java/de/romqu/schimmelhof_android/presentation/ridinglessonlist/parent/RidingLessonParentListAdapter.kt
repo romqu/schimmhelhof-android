@@ -5,7 +5,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import de.romqu.schimmelhof_android.databinding.ItemEmptyListBinding
 import de.romqu.schimmelhof_android.databinding.ItemParentRidinglessonBinding
-import de.romqu.schimmelhof_android.presentation.ridinglessonlist.child.RidingLessonChildListViewHolder
 import de.romqu.schimmelhof_android.presentation.shared.recyclerview.EmptyItem
 import de.romqu.schimmelhof_android.presentation.shared.recyclerview.EmptyListViewHolder
 
@@ -64,3 +63,4 @@ class RidingLessonParentListAdapter(
         notifyDataSetChanged()
     }
 }
+
