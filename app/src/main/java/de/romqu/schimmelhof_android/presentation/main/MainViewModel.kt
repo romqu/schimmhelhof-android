@@ -22,7 +22,7 @@ class MainViewModel @Inject constructor(
             if (bearerToken.isBlank()) {
                 R.id.loginFragment
             } else {
-                R.id.ridinglessonsFragment
+                R.id.ridingLessonsFragment
             }
         }.take(1)
 }
