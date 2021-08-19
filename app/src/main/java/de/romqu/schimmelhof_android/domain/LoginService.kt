@@ -1,6 +1,6 @@
 package de.romqu.schimmelhof_android.domain
 
-import androidx.datastore.DataStore
+import androidx.datastore.core.DataStore
 import de.romqu.schimmelhof_android.data.ApiAuthData
 import de.romqu.schimmelhof_android.data.LoginDtoIn
 import de.romqu.schimmelhof_android.data.shared.ApiCall
@@ -9,11 +9,16 @@ import de.romqu.schimmelhof_android.shared.NetworkConst
 import de.romqu.schimmelhof_android.shared.Result
 import de.romqu.schimmelhof_android.shared.flatMapError
 import okhttp3.Headers
+import java.util.*
+import java.util.regex.Pattern
 import javax.inject.Inject
+
+val AUTH_BEARER_PATTERN: Pattern =
+    Pattern.compile("^Bearer *([^ ]+) *$", Pattern.CASE_INSENSITIVE)
 
 class LoginService @Inject constructor(
     private val userRepository: UserRepository,
-    private val apiDataStore: DataStore<ApiAuthData>
+    private val apiDataStore: DataStore<ApiAuthData>,
 ) {
 
     suspend fun execute(username: String, plainPassword: String): Result<Error, Unit> =
@@ -32,11 +37,22 @@ class LoginService @Inject constructor(
     private suspend fun Result<ApiCall.Error, Headers>.saveAuthToken(): Result<Error, Unit> =
         flatMapError({ headers ->
 
-            val token = headers.get(NetworkConst.AUTHORIZATION_TOKEN)
-                ?: return@flatMapError Result.Failure(Error.AuthTokenDoesNotExist)
+            val authMatcher = AUTH_BEARER_PATTERN.matcher(
+                headers.get(NetworkConst.AUTHORIZATION_TOKEN) ?: ""
+            )
+
+            val token = if (authMatcher.matches()) {
+                val token = authMatcher.group(1)
+
+                try {
+                    UUID.fromString(token)
+                } catch (ex: Exception) {
+                    return Result.Failure(Error.AuthTokenDoesNotExist)
+                }
+            } else return Result.Failure(Error.AuthTokenDoesNotExist)
 
             apiDataStore.updateData { apiAuthData: ApiAuthData ->
-                apiAuthData.copy(bearerToken = token)
+                apiAuthData.copy(bearerToken = token.toString())
             }
 
             Result.Success(Unit)

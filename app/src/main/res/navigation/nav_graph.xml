@@ -7,10 +7,15 @@
     <fragment
         android:id="@+id/loginFragment"
         android:name="de.romqu.schimmelhof_android.presentation.login.LoginFragment"
-        android:label="LoginFragment" />
+        android:label="LoginFragment">
+        <action
+            android:id="@+id/action_login_to_riding"
+            app:destination="@id/ridinglessonsFragment" />
+    </fragment>
+
 
     <fragment
         android:id="@+id/ridinglessonsFragment"
         android:name="de.romqu.schimmelhof_android.presentation.ridinglessonlist.ShowRidingLessonsFragment"
-        android:label="LoginFragment" />
+        android:label="ShowRidingLessonsFragment" />
 </navigation>

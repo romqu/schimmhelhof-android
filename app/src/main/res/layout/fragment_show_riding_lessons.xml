@@ -14,7 +14,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="8dp"
-        android:text="MONTAG"
         tools:text="MONTAG"/>
 
     <androidx.recyclerview.widget.RecyclerView

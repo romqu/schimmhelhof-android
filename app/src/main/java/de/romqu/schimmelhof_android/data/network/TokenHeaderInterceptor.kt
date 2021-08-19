@@ -1,9 +1,8 @@
 package de.romqu.schimmelhof_android.data.network
 
-import androidx.datastore.DataStore
+import androidx.datastore.core.DataStore
 import de.romqu.schimmelhof_android.data.ApiAuthData
 import de.romqu.schimmelhof_android.shared.NetworkConst
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
@@ -23,7 +22,7 @@ class TokenHeaderInterceptor @Inject constructor(
 
         val updatedRequest = if (token != null && token.isNotBlank()) {
             request.newBuilder()
-                .addHeader(NetworkConst.AUTHORIZATION_TOKEN, token)
+                .addHeader(NetworkConst.AUTHORIZATION_TOKEN, "Bearer $token")
                 .build()
         } else request
 

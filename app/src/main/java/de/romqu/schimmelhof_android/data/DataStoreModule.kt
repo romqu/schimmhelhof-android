@@ -1,28 +1,28 @@
 package de.romqu.schimmelhof_android.data
 
 import android.content.Context
-import androidx.datastore.DataStore
-import androidx.datastore.createDataStore
+import androidx.datastore.core.DataStore
+import androidx.datastore.core.DataStoreFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ApplicationComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import de.romqu.schimmelhof_android.data.security.Crypto
+import java.io.File
 import javax.inject.Singleton
 
 @Module
-@InstallIn(ApplicationComponent::class)
+@InstallIn(SingletonComponent::class)
 class DataStoreModule {
 
     @Provides
     @Singleton
     fun provideApiAuthDataStore(
         @ApplicationContext context: Context,
-        crypto: Crypto
+        crypto: Crypto,
     ): DataStore<ApiAuthData> =
-        context.createDataStore(
-            fileName = "api.pb",
+        DataStoreFactory.create(
             serializer = ApiDataStoreSerializer(crypto)
-        )
+        ) { File(context.filesDir.absolutePath + "/api.pb") }
 }

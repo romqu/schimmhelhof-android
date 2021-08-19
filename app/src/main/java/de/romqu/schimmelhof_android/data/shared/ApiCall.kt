@@ -15,7 +15,7 @@ interface ApiCall {
 
     sealed class Error(val message: String) {
         class NotSuccessful(message: String, statusCode: Int) : Error(message)
-        class BodyIsNull() : Error("")
+        class BodyIsNull : Error("")
         class IO(message: String) : Error(message)
     }
 }

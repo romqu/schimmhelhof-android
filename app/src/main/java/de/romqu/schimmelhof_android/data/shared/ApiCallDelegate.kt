@@ -1,6 +1,5 @@
-package de.romqu.schimmelhof_android.data.user
+package de.romqu.schimmelhof_android.data.shared
 
-import de.romqu.schimmelhof_android.data.shared.ApiCall
 import de.romqu.schimmelhof_android.shared.Result
 import de.romqu.schimmelhof_android.shared.map
 import okio.IOException

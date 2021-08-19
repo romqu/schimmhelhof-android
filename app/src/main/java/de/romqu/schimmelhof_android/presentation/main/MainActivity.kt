@@ -3,15 +3,13 @@ package de.romqu.schimmelhof_android.presentation.main
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import de.romqu.schimmelhof_android.R
-import de.romqu.schimmelhof_android.data.user.UserApiDataSource
+import de.romqu.schimmelhof_android.presentation.shared.Navigator
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -24,6 +22,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val viewModel: MainViewModel by viewModels()
+
+    @Inject
+    lateinit var navigator: Navigator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_Schimmelhofandroid)

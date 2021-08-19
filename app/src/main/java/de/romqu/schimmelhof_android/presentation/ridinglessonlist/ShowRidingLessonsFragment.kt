@@ -10,18 +10,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SnapHelper
 import dagger.hilt.android.AndroidEntryPoint
 import de.romqu.schimmelhof_android.R
-import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonRepository
 import de.romqu.schimmelhof_android.databinding.FragmentShowRidingLessonsBinding
-import de.romqu.schimmelhof_android.presentation.ridinglessonlist.child.RidingLessonChildItem
-import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonParentItem
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonParentListAdapter
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.util.attachSnapHelperWithListener
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
-import javax.inject.Inject
 
 @AndroidEntryPoint
 @ExperimentalCoroutinesApi
@@ -30,7 +25,7 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
     private var _binding: FragmentShowRidingLessonsBinding? = null
     private val binding get() = _binding!!
 
-    private val lessonsAdapter  by lazy {
+    private val lessonsAdapter by lazy {
         RidingLessonParentListAdapter(
             mutableListOf(),
             RecyclerView.RecycledViewPool()
@@ -39,12 +34,11 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
 
     val viewModel by viewModels<ShowRidingLessonsViewModel>()
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
+    ): View {
         _binding = FragmentShowRidingLessonsBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -63,15 +57,22 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
 
         val pagerSnapHelper = PagerSnapHelper()
         pagerSnapHelper.attachToRecyclerView(binding.ridingLessonDayParentRcv)
-        binding.ridingLessonDayParentRcv.attachSnapHelperWithListener(pagerSnapHelper) {position ->
-            viewModel.onNextPage()
+        binding.ridingLessonDayParentRcv.attachSnapHelperWithListener(pagerSnapHelper) { position ->
+            viewModel.onNextPage(position)
         }
 
         lifecycleScope.launchWhenCreated {
-            viewModel.ridingLessonItems.collect {
+            viewModel.updateRidingLessonItems.collect {
                 lessonsAdapter.updateData(it)
             }
         }
+
+        lifecycleScope.launchWhenCreated {
+            viewModel.updateDayName.collect {
+                binding.ridingLessonDayTextView.text = it
+            }
+        }
+
     }
 
     override fun onDestroyView() {

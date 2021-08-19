@@ -1,21 +1,26 @@
 package de.romqu.schimmelhof_android.presentation.login
 
-import androidx.hilt.Assisted
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import de.romqu.schimmelhof_android.domain.LoginService
+import de.romqu.schimmelhof_android.presentation.shared.NavigatorDestination
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Named
 
 @ExperimentalCoroutinesApi
-class LoginViewModel @ViewModelInject constructor(
+@HiltViewModel
+class LoginViewModel @Inject constructor(
     private val loginService: LoginService,
-    @Assisted private val savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
+    @Named("q")
+    private val stream: MutableSharedFlow<NavigatorDestination>,
 ) : ViewModel() {
 
     companion object {
@@ -57,7 +62,9 @@ class LoginViewModel @ViewModelInject constructor(
         loginService.execute(
             username = usernameTextState.value,
             plainPassword = plainPasswordTextState.value
-        ).doOn({}, {
+        ).doOn({
+            stream.tryEmit(NavigatorDestination.RidingLessons)
+        }, {
             errorMessage.emit("Da stimmen wohl die Daten nich, wa?")
         })
     }
