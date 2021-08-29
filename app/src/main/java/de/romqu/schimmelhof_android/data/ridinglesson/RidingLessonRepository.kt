@@ -14,10 +14,11 @@ class RidingLessonRepository @Inject constructor(
 ) : ApiCall by apiCallDelegate {
 
     suspend fun getRidingLessonDays(): Result<ApiCall.Error, GetRidingLessonDaysOutDto> =
-        executeBodyCall { apiSource.getRidingLessonDays() }
-            .doOn({ Result.Success(it) }, { createFakeData() })
+        /*executeBodyCall { apiSource.getRidingLessonDays() }
+            .doOn({ Result.Success(it) }, { createFakeData() })*/
+        fake()
 
-    private fun createFakeData(): Result.Success<GetRidingLessonDaysOutDto> {
+    private fun fake(): Result.Success<GetRidingLessonDaysOutDto> {
         return Result.Success(GetRidingLessonDaysOutDto(
             ridingLessonDayDtos = listOf(RidingLessonDayDto(
                 date = LocalDateDto(2020, 11, 2),
