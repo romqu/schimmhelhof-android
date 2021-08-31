@@ -16,7 +16,10 @@ import de.romqu.schimmelhof_android.databinding.FragmentShowRidingLessonsBinding
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonParentListAdapter
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.util.attachSnapHelperWithListener
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collect
+import javax.inject.Inject
+import javax.inject.Named
 
 @AndroidEntryPoint
 @ExperimentalCoroutinesApi
@@ -25,10 +28,15 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
     private var _binding: FragmentShowRidingLessonsBinding? = null
     private val binding get() = _binding!!
 
+    @Inject
+    @Named(ON_ITEM_CLICK)
+    lateinit var onItemClickChannel: MutableSharedFlow<Int>
+
     private val lessonsAdapter by lazy {
         RidingLessonParentListAdapter(
             mutableListOf(),
-            RecyclerView.RecycledViewPool()
+            RecyclerView.RecycledViewPool(),
+            onItemClickChannel
         )
     }
 
@@ -62,7 +70,7 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
         }
 
         lifecycleScope.launchWhenCreated {
-            viewModel.updateRidingLessonItems.collect {
+            viewModel.ridingLessonItems.collect {
                 lessonsAdapter.updateData(it)
             }
         }

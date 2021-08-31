@@ -7,10 +7,12 @@ import de.romqu.schimmelhof_android.databinding.ItemEmptyListBinding
 import de.romqu.schimmelhof_android.databinding.ItemParentRidinglessonBinding
 import de.romqu.schimmelhof_android.presentation.shared.recyclerview.EmptyItem
 import de.romqu.schimmelhof_android.presentation.shared.recyclerview.EmptyListViewHolder
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 class RidingLessonParentListAdapter(
     private val items: MutableList<RidingLessonParentItem>,
     private val recycledViewPool: RecyclerView.RecycledViewPool,
+    private val onItemClickChannel: MutableSharedFlow<Int>,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     // TODO: Might should use delegate pattern at some point
@@ -41,7 +43,8 @@ class RidingLessonParentListAdapter(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
-                )
+                ),
+                onItemClickChannel
             )
         }
 

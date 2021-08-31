@@ -9,23 +9,46 @@ import javax.inject.Singleton
 
 @Singleton
 class RidingLessonRepository @Inject constructor(
-    private val apiSource: RidingLessonApiDataSource,
+    private val api: RidingLessonApi,
     private val apiCallDelegate: ApiCallDelegate,
 ) : ApiCall by apiCallDelegate {
 
+    private val lessonsCache = mutableListOf<RidingLessonDayDto>()
+
+
     suspend fun getRidingLessonDays(): Result<ApiCall.Error, GetRidingLessonDaysOutDto> =
-        /*executeBodyCall { apiSource.getRidingLessonDays() }
+        /*executeBodyCall { api.getRidingLessonDays() }
             .doOn({ Result.Success(it) }, { createFakeData() })*/
         fake()
+
+    fun saveCache(list: List<RidingLessonDayDto>): List<RidingLessonDayDto> {
+        lessonsCache.clear()
+        lessonsCache.addAll(list)
+        return list
+    }
+
+    fun getCache(): List<RidingLessonDayDto> = lessonsCache.toList()
 
     private fun fake(): Result.Success<GetRidingLessonDaysOutDto> {
         return Result.Success(GetRidingLessonDaysOutDto(
             ridingLessonDayDtos = listOf(RidingLessonDayDto(
                 date = LocalDateDto(2020, 11, 2),
                 ridingLessons =
-                (0..9).map {
+                (0..30).map {
                     RidingLessonDto(
-                        title = "TITLE",
+                        title = getRandomString(),
+                        from = LocalTimeDto(it, 40),
+                        to = LocalTimeDto(it + 1, 40),
+                        date = LocalDateDto(2020, 11, 2),
+                        teacher = "TEACHER",
+                    )
+                }
+            ), RidingLessonDayDto(
+                date = LocalDateDto(2020, 11, 2),
+                ridingLessons =
+                (0..30).map {
+                    RidingLessonDto(
+                        title = getRandomString(),
                         from = LocalTimeDto(it, 40),
                         to = LocalTimeDto(it + 1, 40),
                         date = LocalDateDto(2020, 11, 2),
@@ -34,5 +57,23 @@ class RidingLessonRepository @Inject constructor(
                 }
             ))
         ))
+    }
+
+    fun getRandomString(length: Int = 10): String {
+        val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+        return (1..length)
+            .map { allowedChars.random() }
+            .joinToString("")
+    }
+
+
+    suspend fun book(id: String): Result<ApiCall.Error, BookRidingLessonInDto> {
+        return Result.Success(BookRidingLessonInDto("", id))
+        // return executeBodyCall { api.bookLesson(id) }
+    }
+
+    suspend fun cancel(id: String): Result<ApiCall.Error, CancelRidingLessonInDto> {
+        return Result.Success(CancelRidingLessonInDto("", id))
+        //return executeBodyCall { api.cancelLesson(id) }
     }
 }

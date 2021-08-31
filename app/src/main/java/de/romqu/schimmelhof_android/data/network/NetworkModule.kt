@@ -4,8 +4,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonApiDataSource
-import de.romqu.schimmelhof_android.data.user.UserApiDataSource
+import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonApi
+import de.romqu.schimmelhof_android.data.user.UserApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -37,13 +37,13 @@ class NetworkModule {
 
     @Provides
     @Singleton
-    fun provideUserApiService(retrofit: Retrofit): UserApiDataSource =
-        retrofit.create(UserApiDataSource::class.java)
+    fun provideUserApiService(retrofit: Retrofit): UserApi =
+        retrofit.create(UserApi::class.java)
 
     @Provides
     @Singleton
-    fun provideRidingLessonApiService(retrofit: Retrofit): RidingLessonApiDataSource =
-        retrofit.create(RidingLessonApiDataSource::class.java)
+    fun provideRidingLessonApiService(retrofit: Retrofit): RidingLessonApi =
+        retrofit.create(RidingLessonApi::class.java)
 
     @Provides
     @Singleton

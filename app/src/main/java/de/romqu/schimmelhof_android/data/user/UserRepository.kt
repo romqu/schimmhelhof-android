@@ -8,8 +8,8 @@ import okhttp3.Headers
 import javax.inject.Inject
 
 class UserRepository @Inject constructor(
-    private val userApiDataSource: UserApiDataSource,
-    private val apiCallDelegate: ApiCallDelegate
+    private val userApi: UserApi,
+    private val apiCallDelegate: ApiCallDelegate,
 ) : ApiCall by apiCallDelegate {
 
     suspend fun login(loginDtoIn: LoginDtoIn): Result<ApiCall.Error, Headers> =

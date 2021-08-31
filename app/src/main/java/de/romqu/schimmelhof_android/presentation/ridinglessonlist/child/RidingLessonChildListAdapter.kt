@@ -4,9 +4,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import de.romqu.schimmelhof_android.databinding.ItemChildRidinglessonBinding
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 class RidingLessonChildListAdapter(
     private val list: MutableList<RidingLessonChildItem>,
+    private val onItemClickChannel: MutableSharedFlow<Int>,
 ) : RecyclerView.Adapter<RidingLessonChildListViewHolder>() {
 
     override fun onCreateViewHolder(
@@ -16,8 +18,10 @@ class RidingLessonChildListAdapter(
         ItemChildRidinglessonBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
-            false
-        )
+            false,
+        ),
+        onItemClickChannel
+
     )
 
     override fun onBindViewHolder(
