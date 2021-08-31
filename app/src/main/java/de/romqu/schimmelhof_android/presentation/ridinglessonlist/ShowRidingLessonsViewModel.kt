@@ -3,6 +3,7 @@ package de.romqu.schimmelhof_android.presentation.ridinglessonlist
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.recyclerview.widget.DiffUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonRepository
 import de.romqu.schimmelhof_android.domain.GetRidingLessonsService
@@ -27,20 +28,46 @@ class ShowRidingLessonsViewModel @Inject constructor(
     @Named(ON_ITEM_CLICK) private val onItemClickChannel: MutableSharedFlow<Int>,
 ) : ViewModel() {
 
-    private val positionState = MutableStateFlow(0)
+    private val currentPosition = MutableStateFlow(0)
 
-    val ridingLessonItems = MutableStateFlow(emptyList<RidingLessonParentItem>())
+    val ridingLessonParentItems = MutableStateFlow(emptyList<RidingLessonParentItem>())
 
-    private val currentChildList = positionState.combine(ridingLessonItems) { position, list ->
-        list[position].childs
+    private val currentParent: Flow<RidingLessonParentItem> =
+        ridingLessonParentItems.combine(currentPosition) { list, position ->
+            list[position]
+        }
+
+    private val currentChildList: Flow<List<RidingLessonChildItem>> =
+        currentPosition.combine(ridingLessonParentItems) { position, list ->
+            list[position].childs
+        }
+
+    private val parentAndChildList =
+        ridingLessonParentItems.zip(currentChildList) { parent, child ->
+            Pair(parent, child)
+        }
+
+    private val bookResult =
+        parentAndChildList.zip(onItemClickChannel) { parentAndChild, clickedPosition ->
+            val item = parentAndChild.second[clickedPosition]
+            bookLessonRunner.execute(item.id, parentAndChild.first)
+        }.map { result ->
+            result.doOn({ ActionResult.Book(it) }, { ActionResult.BookBad("oh no") })
+        }
+
+    sealed class ActionResult {
+        class Book(val diffResult: DiffUtil.DiffResult) : ActionResult()
+        class BookBad(val message: String) : ActionResult()
+        class Cancel(val diffResult: DiffUtil.DiffResult) : ActionResult()
+        class CancelBad(val message: String) : ActionResult()
     }
 
-    private val book = currentChildList.zip(onItemClickChannel) { a, b ->
-        a
-    }
+    val dispatchBookedList = bookResult
+        .filterIsInstance<ActionResult.Book>()
 
-    val updateDayName =
-        combine(ridingLessonItems.filter { it.isNotEmpty() }, positionState)
+
+    val updateDayName: Flow<String> =
+        combine(ridingLessonParentItems.filter { it.isNotEmpty() }, currentPosition)
         { list, position ->
             val parentItem = list[position]
             "${parentItem.weekdayName} - ${parentItem.date.format(DateTimeFormatter.ofPattern("dd-MM"))}"
@@ -49,17 +76,12 @@ class ShowRidingLessonsViewModel @Inject constructor(
 
     init {
         getLessons()
-        viewModelScope.launch {
-            book.collect {
-                it
-            }
-        }
     }
 
     private fun getLessons() {
         viewModelScope.launch {
             getRidingLessonsService.execute().doOn({ ridingLessonDayDtos ->
-                ridingLessonItems.value = ridingLessonDayDtos.map { dayDto ->
+                ridingLessonParentItems.value = ridingLessonDayDtos.map { dayDto ->
                     val date = LocalDate.of(dayDto.date!!.year, dayDto.date.month, dayDto.date.day)
                     RidingLessonParentItem(
                         date,
@@ -75,7 +97,7 @@ class ShowRidingLessonsViewModel @Inject constructor(
     }
 
     fun onNextPage(position: Int) {
-        positionState.tryEmit(position)
+        currentPosition.tryEmit(position)
     }
 
 }

@@ -70,7 +70,7 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
         }
 
         lifecycleScope.launchWhenCreated {
-            viewModel.ridingLessonItems.collect {
+            viewModel.ridingLessonParentItems.collect {
                 lessonsAdapter.updateData(it)
             }
         }
