@@ -6,6 +6,8 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.18161094224924013" />
         <entry key="app/src/main/res/layout/fragment_login.xml" value="0.18161094224924013" />
         <entry key="app/src/main/res/layout/fragment_show_riding_lessons.xml" value="0.1546875" />
+        <entry key="app/src/main/res/layout/item_child_ridinglesson.xml" value="0.2391304347826087" />
+        <entry key="app/src/main/res/layout/item_parent_ridinglesson.xml" value="0.2391304347826087" />
       </map>
     </option>
   </component>

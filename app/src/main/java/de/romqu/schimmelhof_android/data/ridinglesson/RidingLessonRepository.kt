@@ -4,6 +4,9 @@ import de.romqu.schimmelhof_android.data.*
 import de.romqu.schimmelhof_android.data.shared.ApiCall
 import de.romqu.schimmelhof_android.data.shared.ApiCallDelegate
 import de.romqu.schimmelhof_android.shared.Result
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,6 +17,10 @@ class RidingLessonRepository @Inject constructor(
 ) : ApiCall by apiCallDelegate {
 
     private val lessonsCache = mutableListOf<RidingLessonDayDto>()
+
+    private val lessonCacheChannel = MutableSharedFlow<List<RidingLessonDayDto>>(
+        extraBufferCapacity = Int.MAX_VALUE
+    )
 
 
     suspend fun getRidingLessonDays(): Result<ApiCall.Error, GetRidingLessonDaysOutDto> =
@@ -27,7 +34,13 @@ class RidingLessonRepository @Inject constructor(
         return list
     }
 
+    fun updateCache(list: List<RidingLessonDayDto>) {
+        lessonCacheChannel.tryEmit(list)
+    }
+
     fun getCache(): List<RidingLessonDayDto> = lessonsCache.toList()
+
+    fun observe(): Flow<List<RidingLessonDayDto>> = lessonCacheChannel.asSharedFlow()
 
     private fun fake(): Result.Success<GetRidingLessonDaysOutDto> {
         return Result.Success(GetRidingLessonDaysOutDto(

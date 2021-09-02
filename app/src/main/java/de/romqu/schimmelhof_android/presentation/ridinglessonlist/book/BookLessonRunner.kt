@@ -1,42 +1,38 @@
 package de.romqu.schimmelhof_android.presentation.ridinglessonlist.book
 
-import androidx.recyclerview.widget.DiffUtil
-import dagger.hilt.android.scopes.ViewModelScoped
-import de.romqu.schimmelhof_android.data.RidingLessonDto
-import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonRepository
-import de.romqu.schimmelhof_android.data.shared.ApiCall
-import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonItemDiffCallback
-import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonParentItem
+import dagger.hilt.android.scopes.ActivityRetainedScoped
+import de.romqu.schimmelhof_android.domain.BookRidingLessonService
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.CURRENT_CHILD_ITEMS
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.ON_ITEM_CLICK
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.child.RidingLessonChildItem
 import de.romqu.schimmelhof_android.shared.Result
-import de.romqu.schimmelhof_android.shared.map
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
+import javax.inject.Named
 
-@ViewModelScoped
+@ExperimentalCoroutinesApi
+@ActivityRetainedScoped
 class BookLessonRunner @Inject constructor(
-    private val ridingLessonRepository: RidingLessonRepository,
+    private val bookRidingLessonService: BookRidingLessonService,
+    @Named(ON_ITEM_CLICK)
+    private val onItemClickChannel: MutableSharedFlow<Int>,
+    @Named(CURRENT_CHILD_ITEMS)
+    private val currentChildList: Flow<@JvmSuppressWildcards List<RidingLessonChildItem>>,
 ) {
 
-    suspend fun execute(
-        bookId: String,
-        currentItems: List<RidingLessonParentItem>,
-    ): Result<ApiCall.Error, DiffUtil.DiffResult> {
-        return ridingLessonRepository.book(bookId)
-            .map {
-                currentItems.map { parentItem ->
-                    val newChildItemList = parentItem.childs.map { childItem ->
-                        if (childItem.id == bookId) {
-                            childItem.copy(state = RidingLessonDto.RidingLessonState.BOOKED)
-                        } else childItem
-                    }
-                    parentItem.copy(childs = newChildItemList)
-                }
-            }.map { newItems ->
-                DiffUtil.calculateDiff(RidingLessonItemDiffCallback(
-                    oldList = currentItems,
-                    newList = newItems)
-                )
+    val result =
+        onItemClickChannel.flatMapMerge { clickedPosition ->
+            flowOf(Unit).zip(currentChildList) { _, childList ->
+                bookRidingLessonService.execute(childList[clickedPosition].id)
             }
+        }
 
+    val showSuccessMessage = result.filterIsInstance<Result.Success<*>>()
+        .map {
+            "Success"
+        }
 
-    }
+    val showErrorMessage = result.filterIsInstance<Result.Failure<*>>()
+        .map { "Failure" }
 }

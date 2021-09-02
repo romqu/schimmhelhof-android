@@ -63,6 +63,10 @@ class RidingLessonParentListAdapter(
     fun updateData(list: List<RidingLessonParentItem>) {
         items.clear()
         items.addAll(list)
+
+    }
+
+    fun notifyChange() {
         notifyDataSetChanged()
     }
 }

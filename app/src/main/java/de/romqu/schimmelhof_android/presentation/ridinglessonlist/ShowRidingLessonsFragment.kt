@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import de.romqu.schimmelhof_android.R
 import de.romqu.schimmelhof_android.databinding.FragmentShowRidingLessonsBinding
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.book.BookLessonLayoutFactory
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.book.BookLessonRunner
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonParentListAdapter
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.util.attachSnapHelperWithListener
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,6 +33,12 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
     @Inject
     @Named(ON_ITEM_CLICK)
     lateinit var onItemClickChannel: MutableSharedFlow<Int>
+
+    @Inject
+    lateinit var bookLessonRunner: BookLessonRunner
+
+    @Inject
+    lateinit var bookLayoutFactory: BookLessonLayoutFactory
 
     private val lessonsAdapter by lazy {
         RidingLessonParentListAdapter(
@@ -72,14 +80,25 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
         lifecycleScope.launchWhenCreated {
             viewModel.ridingLessonParentItems.collect {
                 lessonsAdapter.updateData(it)
+                lessonsAdapter.notifyChange()
             }
         }
+
+        lifecycleScope.launchWhenCreated {
+            viewModel.dispatchListUpdates.collect {
+                lessonsAdapter.updateData(it.list)
+                it.diffResult?.dispatchUpdatesTo(lessonsAdapter)
+            }
+        }
+
 
         lifecycleScope.launchWhenCreated {
             viewModel.updateDayName.collect {
                 binding.ridingLessonDayTextView.text = it
             }
         }
+
+        bookLayoutFactory.create(lifecycleScope, requireContext())
 
     }
 
