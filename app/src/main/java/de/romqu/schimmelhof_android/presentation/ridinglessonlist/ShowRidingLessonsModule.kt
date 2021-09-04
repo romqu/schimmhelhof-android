@@ -6,7 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityRetainedComponent
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import de.romqu.schimmelhof_android.data.RidingLessonDayDto
-import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonRepository
+import de.romqu.schimmelhof_android.data.ridinglessonday.RidingLessonDayRepository
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.child.RidingLessonChildItem
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonParentItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -49,9 +49,9 @@ object ShowRidingLessonsRetainedModule {
     @Named(OBSERVE_ITEMS)
     fun observeItems(
         @Named(CURRENT_PARENT_ITEMS) items: MutableStateFlow<List<RidingLessonParentItem>>,
-        repository: RidingLessonRepository,
+        dayRepository: RidingLessonDayRepository,
     ): Flow<List<@JvmSuppressWildcards RidingLessonParentItem>> =
-        merge(items, repository.observe().map(::toItems))
+        merge(items, dayRepository.observe().map(::toItems))
 
     private fun toItems(ridingLessonDayDtos: List<RidingLessonDayDto>) =
         ridingLessonDayDtos.map { dayDto ->

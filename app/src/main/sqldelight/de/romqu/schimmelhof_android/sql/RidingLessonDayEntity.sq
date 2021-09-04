@@ -1,0 +1,22 @@
+import de.romqu.schimmelhof_android.data.ridinglessonday.WeekdayEntity;
+import java.time.LocalDate;
+
+CREATE TABLE IF NOT EXISTS ridingLessonDayEntity (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  weekday TEXT AS WeekdayEntity NOT NULL,
+  date TEXT AS LocalDate NOT NULL
+);
+
+save:
+INSERT INTO ridingLessonDayEntity (weekday, date)
+VALUES ?;
+
+getLastInsertedId:
+SELECT last_insert_rowid();
+
+get:
+SELECT * FROM ridingLessonDayEntity
+INNER JOIN ridingLessonEntity ON ridingLessonDayId = ridingLessonDayEntity.id;
+
+delete:
+DELETE FROM ridingLessonDayEntity;

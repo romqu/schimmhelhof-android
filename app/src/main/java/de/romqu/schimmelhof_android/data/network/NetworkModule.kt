@@ -4,7 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonApi
+import de.romqu.schimmelhof_android.data.ridinglessonday.RidingLessonApi
 import de.romqu.schimmelhof_android.data.user.UserApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import okhttp3.OkHttpClient

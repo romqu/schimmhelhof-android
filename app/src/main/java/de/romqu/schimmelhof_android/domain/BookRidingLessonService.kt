@@ -1,19 +1,19 @@
 package de.romqu.schimmelhof_android.domain
 
 import de.romqu.schimmelhof_android.data.RidingLessonDto
-import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonRepository
+import de.romqu.schimmelhof_android.data.ridinglessonday.RidingLessonDayRepository
 import de.romqu.schimmelhof_android.shared.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class BookRidingLessonService @Inject constructor(
-    private val repository: RidingLessonRepository,
+    private val dayRepository: RidingLessonDayRepository,
 ) {
     suspend fun execute(id: String) =
-        repository.book(id)
+        dayRepository.book(id)
             .map {
-                val cachedList = repository.getCache()
+                val cachedList = dayRepository.getCache()
                 val ridingLessonDayWithIndex = cachedList
                     .mapIndexed { index, dayDto ->
                         val lesson = dayDto.ridingLessons.find { it.lessonId == id }
@@ -35,6 +35,6 @@ class BookRidingLessonService @Inject constructor(
                     index != ridingLessonDayWithIndex.second
                 }.union(listOf(ridingLessonDayWithIndex.first)).toList()
 
-                repository.updateCache(newList)
+                dayRepository.updateCache(newList)
             }
 }

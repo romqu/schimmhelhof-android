@@ -1,0 +1,39 @@
+import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonActionEntity;
+import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonStateEntity;
+import de.romqu.schimmelhof_android.data.ridinglessonday.WeekdayEntity;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+CREATE TABLE ridingLessonEntity (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  remoteId TEXT NOT NULL,
+  weekday TEXT AS WeekdayEntity NOT NULL,
+  title TEXT NOT NULL,
+  fromDate TEXT AS LocalDateTime NOT NULL,
+  toDate TEXT AS LocalDateTime NOT NULL,
+  date TEXT AS LocalDate NOT NULL,
+  teacher TEXT NOT NULL,
+  place TEXT NOT NULL,
+  state TEXT AS RidingLessonStateEntity NOT NULL,
+  action TEXT AS RidingLessonActionEntity NOT NULL,
+  ridingLessonDayId INTEGER NOT NULL,
+  CONSTRAINT fk_riding_lesson_day
+    FOREIGN KEY (ridingLessonDayId)
+    REFERENCES ridingLessonDayEntity(id)
+    ON DELETE CASCADE
+);
+
+save:
+INSERT INTO ridingLessonEntity (
+weekday, title, fromDate, toDate, date,
+teacher, place, remoteId, state, action, ridingLessonDayId)
+VALUES ?;
+
+update:
+UPDATE ridingLessonEntity SET state = ?, action = ? WHERE id = ?;
+
+get:
+SELECT * FROM ridingLessonEntity;
+
+delete:
+DELETE FROM ridingLessonEntity;

@@ -1,4 +1,4 @@
-package de.romqu.schimmelhof_android.data.ridinglesson
+package de.romqu.schimmelhof_android.data.ridinglessonday
 
 enum class WeekdayEntity {
 
