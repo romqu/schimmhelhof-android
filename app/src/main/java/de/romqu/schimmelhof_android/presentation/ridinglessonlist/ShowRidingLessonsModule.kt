@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.*
 import java.time.LocalDate
 import javax.inject.Named
 
+const val CURRENT_LESSON_DAYS = "CURRENT_LESSON_DAYS"
 const val ON_ITEM_CLICK = "ON_ITEM_CLICK"
 const val CURRENT_POSITION = "CURRENT_POSITION"
 const val CURRENT_PARENT_ITEMS = "CURRENT_PARENT_ITEMS"
@@ -25,6 +26,13 @@ const val OBSERVE_ITEMS = "OBSERVE_ITEMS"
 @InstallIn(ActivityRetainedComponent::class)
 object ShowRidingLessonsRetainedModule {
 
+
+    @Provides
+    @ActivityRetainedScoped
+    @Named(CURRENT_LESSON_DAYS)
+    fun provideCurrentItems(
+        ridingLessonDayRepository: RidingLessonDayRepository,
+    ) = ridingLessonDayRepository.get()
 
     @Provides
     @ActivityRetainedScoped

@@ -96,6 +96,7 @@ dependencies {
 
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
     implementation "com.squareup.sqldelight:android-driver:1.5.1"
+    implementation "com.squareup.sqldelight:coroutines-extensions-jvm:1.5.1"
 
 }
 

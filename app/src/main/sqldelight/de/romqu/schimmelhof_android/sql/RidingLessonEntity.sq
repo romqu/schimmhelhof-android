@@ -2,15 +2,15 @@ import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonActionEntity;
 import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonStateEntity;
 import de.romqu.schimmelhof_android.data.ridinglessonday.WeekdayEntity;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 CREATE TABLE ridingLessonEntity (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   remoteId TEXT NOT NULL,
   weekday TEXT AS WeekdayEntity NOT NULL,
   title TEXT NOT NULL,
-  fromDate TEXT AS LocalDateTime NOT NULL,
-  toDate TEXT AS LocalDateTime NOT NULL,
+  fromTime TEXT AS LocalTime NOT NULL,
+  toTime TEXT AS LocalTime NOT NULL,
   date TEXT AS LocalDate NOT NULL,
   teacher TEXT NOT NULL,
   place TEXT NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE ridingLessonEntity (
 
 save:
 INSERT INTO ridingLessonEntity (
-weekday, title, fromDate, toDate, date,
+weekday, title, fromTime, toTime, date,
 teacher, place, remoteId, state, action, ridingLessonDayId)
 VALUES ?;
 

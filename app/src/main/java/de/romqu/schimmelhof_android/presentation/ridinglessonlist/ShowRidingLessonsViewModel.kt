@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.romqu.schimmelhof_android.data.RidingLessonDayDto
 import de.romqu.schimmelhof_android.domain.GetRidingLessonsService
+import de.romqu.schimmelhof_android.domain.LoadInitialLessonDaysService
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.child.RidingLessonChildItem
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonItemDiffCallback
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonParentItem
@@ -23,6 +24,7 @@ import javax.inject.Named
 class ShowRidingLessonsViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getRidingLessonsService: GetRidingLessonsService,
+    private val initialService: LoadInitialLessonDaysService,
     @Named(CURRENT_POSITION) private val currentPosition: MutableStateFlow<Int>,
     @Named(CURRENT_PARENT_ITEMS) val ridingLessonParentItems: MutableStateFlow<List<RidingLessonParentItem>>,
     @Named(OBSERVE_ITEMS) val observeItems: Flow<@JvmSuppressWildcards List<RidingLessonParentItem>>,
@@ -54,6 +56,9 @@ class ShowRidingLessonsViewModel @Inject constructor(
 
 
     init {
+        viewModelScope.launch {
+            initialService.execute()
+        }
         getLessons()
     }
 

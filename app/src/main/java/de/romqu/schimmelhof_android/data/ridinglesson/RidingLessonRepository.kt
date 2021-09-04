@@ -12,5 +12,4 @@ class RidingLessonRepository @Inject constructor(
     fun save(list: List<RidingLessonEntity>) {
         list.map { dao.save(it) }
     }
-
 }

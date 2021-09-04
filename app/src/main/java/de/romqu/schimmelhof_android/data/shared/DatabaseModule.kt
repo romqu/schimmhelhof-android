@@ -17,7 +17,7 @@ import de.romqu.schimmelhofandroid.sql.RidingLessonDayEntityQueries
 import de.romqu.schimmelhofandroid.sql.RidingLessonEntity
 import de.romqu.schimmelhofandroid.sql.RidingLessonEntityQueries
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.LocalTime
 import javax.inject.Singleton
 
 @Module
@@ -32,8 +32,8 @@ object DatabaseModule {
             "schimmelhof.db",
             callback = object : AndroidSqliteDriver.Callback(Database.Schema) {
                 override fun onOpen(db: SupportSQLiteDatabase) {
-                    db.execSQL("PRAGMA journal_mode=WAL;")
-                    db.execSQL("PRAGMA foreign_keys = ON;")
+                    db.query("PRAGMA journal_mode=WAL;")
+                    db.query("PRAGMA foreign_keys = ON;")
                 }
             })
 
@@ -44,8 +44,8 @@ object DatabaseModule {
                 actionAdapter = EnumColumnAdapter(),
                 weekdayAdapter = EnumColumnAdapter(),
                 dateAdapter = LocalDateColumnAdapter(),
-                fromDateAdapter = LocalDateTimeColumnAdapter(),
-                toDateAdapter = LocalDateTimeColumnAdapter(),
+                fromTimeAdapter = LocalTimeColumnAdapter(),
+                toTimeAdapter = LocalTimeColumnAdapter(),
             ),
             ridingLessonDayEntityAdapter = RidingLessonDayEntity.Adapter(
                 weekdayAdapter = EnumColumnAdapter(),
@@ -75,12 +75,12 @@ class LocalDateColumnAdapter : ColumnAdapter<LocalDate, String> {
         value.toString()
 }
 
-class LocalDateTimeColumnAdapter : ColumnAdapter<LocalDateTime, String> {
-    override fun decode(databaseValue: String): LocalDateTime =
-        LocalDateTime.parse(databaseValue)
+class LocalTimeColumnAdapter : ColumnAdapter<LocalTime, String> {
+    override fun decode(databaseValue: String): LocalTime =
+        LocalTime.parse(databaseValue)
 
 
-    override fun encode(value: LocalDateTime): String =
+    override fun encode(value: LocalTime): String =
         value.toString()
 }
 

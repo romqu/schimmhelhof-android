@@ -1,14 +1,19 @@
 package de.romqu.schimmelhof_android.data.ridinglessonday
 
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
 import de.romqu.schimmelhof_android.data.*
 import de.romqu.schimmelhof_android.data.shared.ApiCall
 import de.romqu.schimmelhof_android.data.shared.ApiCallDelegate
 import de.romqu.schimmelhof_android.shared.Result
+import de.romqu.schimmelhofandroid.sql.Get
 import de.romqu.schimmelhofandroid.sql.RidingLessonDayEntity
 import de.romqu.schimmelhofandroid.sql.RidingLessonDayEntityQueries
+import de.romqu.schimmelhofandroid.sql.RidingLessonEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,12 +36,54 @@ class RidingLessonDayRepository @Inject constructor(
             .doOn({ Result.Success(it) }, { createFakeData() })*/
         fake()
 
-    fun save(list: List<RidingLessonDayEntity>): List<RidingLessonDayEntity> =
-        list.map { entity ->
-            lessonDayDao.save(entity)
-            val insertedId = lessonDayDao.getLastInsertedId().executeAsOne()
-            entity.copy(id = insertedId)
+    fun get(): Flow<List<LessonsDayEntity>> = lessonDayDao.get()
+        .asFlow()
+        .mapToList()
+        .map { rows ->
+            rows.groupBy(Get::id)
+                .map { entry ->
+
+                    val firstRow = entry.value.first()
+                    val lessonDay = RidingLessonDayEntity(
+                        firstRow.id,
+                        WeekdayEntity.valueOf(firstRow.weekday.name),
+                        firstRow.date
+                    )
+
+                    val lessons = entry.value.map { row ->
+                        with(row) {
+                            RidingLessonEntity(
+                                id_,
+                                remoteId,
+                                weekday_,
+                                title,
+                                fromTime,
+                                toTime,
+                                date_,
+                                teacher,
+                                place,
+                                state,
+                                action,
+                                ridingLessonDayId
+                            )
+                        }
+                    }
+
+                    LessonsDayEntity(
+                        lessonDay,
+                        lessons
+                    )
+                }
         }
+
+    fun save(list: List<RidingLessonDayEntity>): List<RidingLessonDayEntity> =
+        list.map(::save)
+
+    fun save(entity: RidingLessonDayEntity): RidingLessonDayEntity {
+        lessonDayDao.save(entity)
+        val insertedId = lessonDayDao.getLastInsertedId().executeAsOne()
+        return entity.copy(id = insertedId)
+    }
 
 
     fun saveCache(list: List<RidingLessonDayDto>): List<RidingLessonDayDto> {
@@ -65,11 +112,12 @@ class RidingLessonDayRepository @Inject constructor(
                 (0..30).map {
                     RidingLessonDto(
                         title = getRandomString(),
-                        from = LocalTimeDto(it, 40),
-                        to = LocalTimeDto(it + 1, 40),
+                        from = LocalTimeDto(13, 40),
+                        to = LocalTimeDto(14, 40),
                         date = LocalDateDto(2020, 11, 2),
                         teacher = "TEACHER",
-                    )
+
+                        )
                 }
             ), RidingLessonDayDto(
                 date = LocalDateDto(2020, 11, 2),
@@ -77,8 +125,8 @@ class RidingLessonDayRepository @Inject constructor(
                 (0..30).map {
                     RidingLessonDto(
                         title = getRandomString(),
-                        from = LocalTimeDto(it, 40),
-                        to = LocalTimeDto(it + 1, 40),
+                        from = LocalTimeDto(13, 40),
+                        to = LocalTimeDto(13, 40),
                         date = LocalDateDto(2020, 11, 2),
                         teacher = "TEACHER",
                     )
@@ -105,3 +153,8 @@ class RidingLessonDayRepository @Inject constructor(
         //return executeBodyCall { api.cancelLesson(id) }
     }
 }
+
+class LessonsDayEntity(
+    day: RidingLessonDayEntity,
+    lessons: List<RidingLessonEntity>,
+)
