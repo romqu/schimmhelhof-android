@@ -1,33 +1,35 @@
-package de.romqu.schimmelhof_android.presentation.ridinglessonlist.child
+package de.romqu.schimmelhof_android.presentation.ridinglessonlist.lesson
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import de.romqu.schimmelhof_android.databinding.ItemChildRidinglessonBinding
 import kotlinx.coroutines.flow.MutableSharedFlow
 
-class RidingLessonChildListAdapter(
-    private val list: MutableList<RidingLessonChildItem>,
-    private val onItemClickChannel: MutableSharedFlow<Int>,
-) : RecyclerView.Adapter<RidingLessonChildListViewHolder>() {
+class RidingLessonListAdapter(
+    private val list: MutableList<RidingLessonItem>,
+    private val onItemClickChannel: MutableSharedFlow<RidingLessonItem>,
+) : RecyclerView.Adapter<RidingLessonListViewHolder>() {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): RidingLessonChildListViewHolder = RidingLessonChildListViewHolder(
+    ): RidingLessonListViewHolder = RidingLessonListViewHolder(
         ItemChildRidinglessonBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false,
-        ),
-        onItemClickChannel
-
-    )
+        )
+    ) { position ->
+        Log.d("AAAAA", "EMIT")
+        onItemClickChannel.tryEmit(list[position])
+    }
 
     override fun onBindViewHolder(
-        holderChild: RidingLessonChildListViewHolder,
+        holder: RidingLessonListViewHolder,
         position: Int,
-    ) = holderChild.bind(list[position])
+    ) = holder.bind(list[position])
 
     override fun getItemCount(): Int = list.size
 }

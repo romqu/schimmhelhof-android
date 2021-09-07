@@ -5,16 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.DiffUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
-import de.romqu.schimmelhof_android.data.RidingLessonDayDto
-import de.romqu.schimmelhof_android.domain.GetRidingLessonsService
+import de.romqu.schimmelhof_android.data.ridinglessonday.RidingLessonDayRepository
 import de.romqu.schimmelhof_android.domain.LoadInitialLessonDaysService
-import de.romqu.schimmelhof_android.presentation.ridinglessonlist.child.RidingLessonChildItem
-import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonItemDiffCallback
-import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonParentItem
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.book.BookLessonRunnerFactory
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.day.RidingLessonDayItem
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.day.RidingLessonDayItemDiffCallback
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.lesson.RidingLessonItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Named
@@ -22,33 +21,63 @@ import javax.inject.Named
 @ExperimentalCoroutinesApi
 @HiltViewModel
 class ShowRidingLessonsViewModel @Inject constructor(
+    ridingLessonDayRepository: RidingLessonDayRepository,
     private val savedStateHandle: SavedStateHandle,
-    private val getRidingLessonsService: GetRidingLessonsService,
     private val initialService: LoadInitialLessonDaysService,
     @Named(CURRENT_POSITION) private val currentPosition: MutableStateFlow<Int>,
-    @Named(CURRENT_PARENT_ITEMS) val ridingLessonParentItems: MutableStateFlow<List<RidingLessonParentItem>>,
-    @Named(OBSERVE_ITEMS) val observeItems: Flow<@JvmSuppressWildcards List<RidingLessonParentItem>>,
+    bookLessonRunnerFactory: BookLessonRunnerFactory,
 ) : ViewModel() {
 
-    private val observeItemsShared = observeItems.shareIn(
-        viewModelScope, SharingStarted.Lazily
-    )
+    private val onListDispatched = MutableSharedFlow<Unit>()
+    val bookLessonRunner by lazy {
+        bookLessonRunnerFactory.create(viewModelScope)
+    }
 
-    val dispatchListUpdates = observeItemsShared
+    private val unmodifiedItems = ridingLessonDayRepository.get()
+        .map { entityList ->
+            entityList.map { entity ->
+                RidingLessonDayItem(
+                    entity.day.date,
+                    entity.day.weekday.name,
+                    entity.lessons.map { lesson ->
+                        RidingLessonItem(
+                            title = lesson.title,
+                            state = lesson.state,
+                            id = lesson.id,
+                            remoteId = lesson.remoteId,
+                        )
+                    }
+                )
+            }
+        }.shareIn(
+            viewModelScope, SharingStarted.Lazily
+        )
+
+    val setInitialItems = unmodifiedItems.take(1)
+
+    private val lastScrollPosition = unmodifiedItems.flatMapMerge {
+        currentPosition
+    }
+
+    val scrollToPosition = onListDispatched.drop(2).flatMapConcat {
+        lastScrollPosition.take(1)
+    }
+
+    val dispatchListUpdates = unmodifiedItems
+        .filter { it.isNotEmpty() }
         .scan(DispatchListUpdate()) { previous, next ->
             val diffResult =
-                DiffUtil.calculateDiff(RidingLessonItemDiffCallback(previous.list, next))
+                DiffUtil.calculateDiff(RidingLessonDayItemDiffCallback(previous.list, next))
             DispatchListUpdate(next, diffResult)
         }.filter { it.list.isNotEmpty() }
 
     class DispatchListUpdate(
-        val list: List<RidingLessonParentItem> = emptyList(),
+        val list: List<RidingLessonDayItem> = emptyList(),
         val diffResult: DiffUtil.DiffResult? = null,
     )
 
-
     val updateDayName: Flow<String> =
-        combine(observeItems.filter { it.isNotEmpty() }, currentPosition)
+        combine(unmodifiedItems.filter { it.isNotEmpty() }, currentPosition)
         { list, position ->
             val parentItem = list[position]
             "${parentItem.weekdayName} - ${parentItem.date.format(DateTimeFormatter.ofPattern("dd-MM"))}"
@@ -56,35 +85,22 @@ class ShowRidingLessonsViewModel @Inject constructor(
 
 
     init {
-        viewModelScope.launch {
-            initialService.execute()
-        }
-        getLessons()
+        initLoadLessons()
     }
 
-    private fun getLessons() {
+    private fun initLoadLessons() {
         viewModelScope.launch {
-            getRidingLessonsService.execute().doOn({ ridingLessonDayDtos ->
-                ridingLessonParentItems.value = toItems(ridingLessonDayDtos)
-            }, {})
+            initialService.execute().doOn({}, {})
         }
-
     }
-
-    private fun toItems(ridingLessonDayDtos: List<RidingLessonDayDto>) =
-        ridingLessonDayDtos.map { dayDto ->
-            val date = LocalDate.of(dayDto.date!!.year, dayDto.date.month, dayDto.date.day)
-            RidingLessonParentItem(
-                date,
-                dayDto.weekday.name,
-                dayDto.ridingLessons.map {
-                    RidingLessonChildItem(it.title, it.lessonId, it.state)
-                }
-            )
-        }
 
     fun onNextPage(position: Int) {
         currentPosition.tryEmit(position)
     }
 
+    fun onListDispatched() {
+        viewModelScope.launch {
+            onListDispatched.emit(Unit)
+        }
+    }
 }

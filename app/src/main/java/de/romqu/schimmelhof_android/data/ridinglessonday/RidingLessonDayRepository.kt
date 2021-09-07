@@ -36,7 +36,7 @@ class RidingLessonDayRepository @Inject constructor(
             .doOn({ Result.Success(it) }, { createFakeData() })*/
         fake()
 
-    fun get(): Flow<List<LessonsDayEntity>> = lessonDayDao.get()
+    fun get(): Flow<List<DayWithLessonsEntity>> = lessonDayDao.get()
         .asFlow()
         .mapToList()
         .map { rows ->
@@ -69,7 +69,7 @@ class RidingLessonDayRepository @Inject constructor(
                         }
                     }
 
-                    LessonsDayEntity(
+                    DayWithLessonsEntity(
                         lessonDay,
                         lessons
                     )
@@ -105,34 +105,26 @@ class RidingLessonDayRepository @Inject constructor(
     fun observe(): Flow<List<RidingLessonDayDto>> = lessonCacheChannel.asSharedFlow()
 
     private fun fake(): Result.Success<GetRidingLessonDaysOutDto> {
-        return Result.Success(GetRidingLessonDaysOutDto(
-            ridingLessonDayDtos = listOf(RidingLessonDayDto(
-                date = LocalDateDto(2020, 11, 2),
-                ridingLessons =
-                (0..30).map {
-                    RidingLessonDto(
-                        title = getRandomString(),
-                        from = LocalTimeDto(13, 40),
-                        to = LocalTimeDto(14, 40),
+        return Result.Success(
+            GetRidingLessonDaysOutDto(
+                ridingLessonDayDtos = (0..1).map {
+                    RidingLessonDayDto(
                         date = LocalDateDto(2020, 11, 2),
-                        teacher = "TEACHER",
+                        ridingLessons =
+                        ('A'..'Z').map {
+                            RidingLessonDto(
+                                title = if (it == 'A') getRandomString() else it.toString(),
+                                from = LocalTimeDto(13, 40),
+                                to = LocalTimeDto(14, 40),
+                                date = LocalDateDto(2020, 11, 2),
+                                teacher = "TEACHER",
 
-                        )
-                }
-            ), RidingLessonDayDto(
-                date = LocalDateDto(2020, 11, 2),
-                ridingLessons =
-                (0..30).map {
-                    RidingLessonDto(
-                        title = getRandomString(),
-                        from = LocalTimeDto(13, 40),
-                        to = LocalTimeDto(13, 40),
-                        date = LocalDateDto(2020, 11, 2),
-                        teacher = "TEACHER",
+                                )
+                        }
                     )
                 }
-            ))
-        ))
+            )
+        )
     }
 
     fun getRandomString(length: Int = 10): String {
@@ -154,7 +146,7 @@ class RidingLessonDayRepository @Inject constructor(
     }
 }
 
-class LessonsDayEntity(
-    day: RidingLessonDayEntity,
-    lessons: List<RidingLessonEntity>,
+class DayWithLessonsEntity(
+    val day: RidingLessonDayEntity,
+    val lessons: List<RidingLessonEntity>,
 )

@@ -1,29 +1,30 @@
-package de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent
+package de.romqu.schimmelhof_android.presentation.ridinglessonlist.day
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import de.romqu.schimmelhof_android.databinding.ItemParentRidinglessonBinding
-import de.romqu.schimmelhof_android.presentation.ridinglessonlist.child.RidingLessonChildListAdapter
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.lesson.RidingLessonItem
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.lesson.RidingLessonListAdapter
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 
-class RidingLessonParentListViewHolder(
+class RidingLessonDayListViewHolder(
     private val binding: ItemParentRidinglessonBinding,
-    private val onItemClickChannel: MutableSharedFlow<Int>,
+    private val onItemClickChannel: MutableSharedFlow<RidingLessonItem>,
 ) :
     RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(parentItem: RidingLessonParentItem, recycledViewPool: RecyclerView.RecycledViewPool) {
+    fun bind(dayItem: RidingLessonDayItem, recycledViewPool: RecyclerView.RecycledViewPool) {
 
         val linearLayoutManager = LinearLayoutManager(
             binding.ridingLessonDayChildRcv.context,
             LinearLayoutManager.VERTICAL,
             false)
 
-        linearLayoutManager.initialPrefetchItemCount = parentItem.childs.size
+        linearLayoutManager.initialPrefetchItemCount = dayItem.lessons.size
 
         val childAdapter =
-            RidingLessonChildListAdapter(parentItem.childs.toMutableList(), onItemClickChannel)
+            RidingLessonListAdapter(dayItem.lessons.toMutableList(), onItemClickChannel)
 
         binding.ridingLessonDayChildRcv.apply {
             layoutManager = linearLayoutManager

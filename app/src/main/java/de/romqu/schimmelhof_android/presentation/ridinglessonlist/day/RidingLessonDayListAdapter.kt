@@ -1,18 +1,19 @@
-package de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent
+package de.romqu.schimmelhof_android.presentation.ridinglessonlist.day
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import de.romqu.schimmelhof_android.databinding.ItemEmptyListBinding
 import de.romqu.schimmelhof_android.databinding.ItemParentRidinglessonBinding
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.lesson.RidingLessonItem
 import de.romqu.schimmelhof_android.presentation.shared.recyclerview.EmptyItem
 import de.romqu.schimmelhof_android.presentation.shared.recyclerview.EmptyListViewHolder
 import kotlinx.coroutines.flow.MutableSharedFlow
 
-class RidingLessonParentListAdapter(
-    private val items: MutableList<RidingLessonParentItem>,
+class RidingLessonDayListAdapter(
+    private val items: MutableList<RidingLessonDayItem>,
     private val recycledViewPool: RecyclerView.RecycledViewPool,
-    private val onItemClickChannel: MutableSharedFlow<Int>,
+    private val onItemClickChannel: MutableSharedFlow<RidingLessonItem>,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     // TODO: Might should use delegate pattern at some point
@@ -38,7 +39,7 @@ class RidingLessonParentListAdapter(
                     false
                 )
             )
-            else -> RidingLessonParentListViewHolder(
+            else -> RidingLessonDayListViewHolder(
                 ItemParentRidinglessonBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
@@ -54,13 +55,13 @@ class RidingLessonParentListAdapter(
         position: Int,
     ) {
         when (holder) {
-            is RidingLessonParentListViewHolder -> holder.bind(items[position], recycledViewPool)
+            is RidingLessonDayListViewHolder -> holder.bind(items[position], recycledViewPool)
             is EmptyListViewHolder -> holder.bind(EmptyItem("EMPTY"))
         }
     }
 
 
-    fun updateData(list: List<RidingLessonParentItem>) {
+    fun updateData(list: List<RidingLessonDayItem>) {
         items.clear()
         items.addAll(list)
 

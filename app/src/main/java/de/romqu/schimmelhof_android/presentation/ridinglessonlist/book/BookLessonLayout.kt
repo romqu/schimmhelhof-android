@@ -6,6 +6,7 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.ShowRidingLessonsViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 
@@ -13,20 +14,20 @@ import kotlinx.coroutines.flow.collect
 @ExperimentalCoroutinesApi
 class BookLessonLayout
 @AssistedInject constructor(
-    private val bookLessonRunner: BookLessonRunner,
     @Assisted private val scope: LifecycleCoroutineScope,
     @Assisted private val context: Context,
+    @Assisted private val viewModel: ShowRidingLessonsViewModel,
 ) {
 
     init {
         scope.launchWhenCreated {
-            bookLessonRunner.showSuccessMessage.collect {
+            viewModel.bookLessonRunner.showSuccessMessage.collect {
                 Toast.makeText(context, it, Toast.LENGTH_LONG).show()
             }
         }
 
         scope.launchWhenCreated {
-            bookLessonRunner.showErrorMessage.collect {
+            viewModel.bookLessonRunner.showErrorMessage.collect {
                 Toast.makeText(context, it, Toast.LENGTH_LONG).show()
             }
         }
@@ -35,5 +36,9 @@ class BookLessonLayout
 
 @AssistedFactory
 interface BookLessonLayoutFactory {
-    fun create(scope: LifecycleCoroutineScope, context: Context): BookLessonLayout
+    fun create(
+        scope: LifecycleCoroutineScope,
+        context: Context,
+        viewModel: ShowRidingLessonsViewModel,
+    ): BookLessonLayout
 }

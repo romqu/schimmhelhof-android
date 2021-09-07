@@ -1,24 +1,25 @@
-package de.romqu.schimmelhof_android.presentation.ridinglessonlist.child
+package de.romqu.schimmelhof_android.presentation.ridinglessonlist.lesson
 
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import de.romqu.schimmelhof_android.R
-import de.romqu.schimmelhof_android.data.RidingLessonDto.RidingLessonState.*
+import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonStateEntity.*
 import de.romqu.schimmelhof_android.databinding.ItemChildRidinglessonBinding
-import kotlinx.coroutines.flow.MutableSharedFlow
 
-class RidingLessonChildListViewHolder(
+class RidingLessonListViewHolder(
     private val binding: ItemChildRidinglessonBinding,
-    onItemClickChannel: MutableSharedFlow<Int>,
+    onItemClick: (position: Int) -> Unit,
 ) : RecyclerView.ViewHolder(binding.root) {
 
     init {
         binding.root.setOnClickListener {
-            onItemClickChannel.tryEmit(bindingAdapterPosition)
+            Log.d("AAAAA", "CLICK")
+            onItemClick(bindingAdapterPosition)
         }
     }
 
-    fun bind(item: RidingLessonChildItem) {
+    fun bind(item: RidingLessonItem) {
         val colorId = when (item.state) {
             EXPIRED -> R.color.white
             BOOKED_OUT -> R.color.white
@@ -33,7 +34,7 @@ class RidingLessonChildListViewHolder(
         )
 
         binding.apply {
-            ridingTextView.text = item.text
+            ridingTextView.text = item.title
         }
     }
 }

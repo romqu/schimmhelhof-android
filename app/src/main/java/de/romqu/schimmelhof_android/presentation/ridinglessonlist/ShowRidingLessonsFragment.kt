@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -14,8 +15,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import de.romqu.schimmelhof_android.R
 import de.romqu.schimmelhof_android.databinding.FragmentShowRidingLessonsBinding
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.book.BookLessonLayoutFactory
-import de.romqu.schimmelhof_android.presentation.ridinglessonlist.book.BookLessonRunner
-import de.romqu.schimmelhof_android.presentation.ridinglessonlist.parent.RidingLessonParentListAdapter
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.day.RidingLessonDayListAdapter
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.lesson.RidingLessonItem
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.util.attachSnapHelperWithListener
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -32,16 +33,13 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
 
     @Inject
     @Named(ON_ITEM_CLICK)
-    lateinit var onItemClickChannel: MutableSharedFlow<Int>
-
-    @Inject
-    lateinit var bookLessonRunner: BookLessonRunner
+    lateinit var onItemClickChannel: MutableSharedFlow<RidingLessonItem>
 
     @Inject
     lateinit var bookLayoutFactory: BookLessonLayoutFactory
 
     private val lessonsAdapter by lazy {
-        RidingLessonParentListAdapter(
+        RidingLessonDayListAdapter(
             mutableListOf(),
             RecyclerView.RecycledViewPool(),
             onItemClickChannel
@@ -62,6 +60,8 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        ConcatAdapter()
+
         binding.ridingLessonDayParentRcv.apply {
             layoutManager = LinearLayoutManager(
                 requireContext(),
@@ -78,9 +78,15 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
         }
 
         lifecycleScope.launchWhenCreated {
-            viewModel.ridingLessonParentItems.collect {
+            viewModel.setInitialItems.collect {
                 lessonsAdapter.updateData(it)
                 lessonsAdapter.notifyChange()
+            }
+        }
+
+        lifecycleScope.launchWhenCreated {
+            viewModel.scrollToPosition.collect {
+                binding.ridingLessonDayParentRcv.scrollToPosition(it)
             }
         }
 
@@ -88,9 +94,9 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
             viewModel.dispatchListUpdates.collect {
                 lessonsAdapter.updateData(it.list)
                 it.diffResult?.dispatchUpdatesTo(lessonsAdapter)
+                viewModel.onListDispatched()
             }
         }
-
 
         lifecycleScope.launchWhenCreated {
             viewModel.updateDayName.collect {
@@ -98,8 +104,7 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
             }
         }
 
-        bookLayoutFactory.create(lifecycleScope, requireContext())
-
+        bookLayoutFactory.create(lifecycleScope, requireContext(), viewModel)
     }
 
     override fun onDestroyView() {

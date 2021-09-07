@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
             val navInflater = navController.navInflater
             val graph = navInflater.inflate(R.navigation.nav_graph)
 
-            graph.startDestination = it
+            graph.setStartDestination(it)
 
             navController.graph = graph
         }
