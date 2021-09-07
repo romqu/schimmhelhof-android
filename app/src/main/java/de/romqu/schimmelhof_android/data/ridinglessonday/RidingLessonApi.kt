@@ -12,11 +12,11 @@ import retrofit2.http.Path
 interface RidingLessonApi {
 
     @GET("/api/v1/ridinglessonsdays")
-    suspend fun getRidingLessonDays(): Response<GetRidingLessonDaysOutDto>
+    suspend fun get(): Response<GetRidingLessonDaysOutDto>
 
     @POST("/api/v1/book/lesson/{id}")
-    suspend fun bookLesson(@Path("id") id: String): Response<BookRidingLessonInDto>
+    suspend fun book(@Path("id") id: String): Response<BookRidingLessonInDto>
 
     @DELETE("/api/v1/book/lesson/{id}")
-    suspend fun cancelLesson(@Path("id") id: String): Response<CancelRidingLessonInDto>
+    suspend fun cancel(@Path("id") id: String): Response<CancelRidingLessonInDto>
 }

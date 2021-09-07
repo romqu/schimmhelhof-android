@@ -1,18 +1,18 @@
 package de.romqu.schimmelhof_android.data.ridinglessonday
 
-enum class WeekdayEntity {
+enum class WeekdayEntity(val german: String) {
 
-    MONDAY,
+    MONDAY("Montag"),
 
-    TUESDAY,
+    TUESDAY("Dienstag"),
 
-    WEDNESDAY,
+    WEDNESDAY("Mittwoch"),
 
-    THURSDAY,
+    THURSDAY("Donnerstag"),
 
-    FRIDAY,
+    FRIDAY("Freitag"),
 
-    SATURDAY,
+    SATURDAY("Samstag"),
 
-    SUNDAY
+    SUNDAY("Sonntag"),
 }

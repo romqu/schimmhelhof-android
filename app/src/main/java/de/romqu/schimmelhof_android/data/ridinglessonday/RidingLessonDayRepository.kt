@@ -11,8 +11,6 @@ import de.romqu.schimmelhofandroid.sql.RidingLessonDayEntity
 import de.romqu.schimmelhofandroid.sql.RidingLessonDayEntityQueries
 import de.romqu.schimmelhofandroid.sql.RidingLessonEntity
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,17 +22,9 @@ class RidingLessonDayRepository @Inject constructor(
     private val lessonDayDao: RidingLessonDayEntityQueries,
 ) : ApiCall by apiCallDelegate {
 
-    private val lessonsCache = mutableListOf<RidingLessonDayDto>()
-
-    private val lessonCacheChannel = MutableSharedFlow<List<RidingLessonDayDto>>(
-        extraBufferCapacity = Int.MAX_VALUE
-    )
-
-
     suspend fun getRidingLessonDaysNet(): Result<ApiCall.Error, GetRidingLessonDaysOutDto> =
-        /*executeBodyCall { api.getRidingLessonDays() }
-            .doOn({ Result.Success(it) }, { createFakeData() })*/
-        fake()
+        executeBodyCall { api.get() }
+    // fake()
 
     fun get(): Flow<List<DayWithLessonsEntity>> = lessonDayDao.get()
         .asFlow()
@@ -85,24 +75,9 @@ class RidingLessonDayRepository @Inject constructor(
         return entity.copy(id = insertedId)
     }
 
-
-    fun saveCache(list: List<RidingLessonDayDto>): List<RidingLessonDayDto> {
-        lessonsCache.clear()
-        lessonsCache.addAll(list)
-        return list
-    }
-
-    fun updateCache(list: List<RidingLessonDayDto>) {
-        lessonCacheChannel.tryEmit(list)
-    }
-
     fun delete() {
         lessonDayDao.delete()
     }
-
-    fun getCache(): List<RidingLessonDayDto> = lessonsCache.toList()
-
-    fun observe(): Flow<List<RidingLessonDayDto>> = lessonCacheChannel.asSharedFlow()
 
     private fun fake(): Result.Success<GetRidingLessonDaysOutDto> {
         return Result.Success(
@@ -113,7 +88,7 @@ class RidingLessonDayRepository @Inject constructor(
                         ridingLessons =
                         ('A'..'Z').map {
                             RidingLessonDto(
-                                title = if (it == 'A') getRandomString() else it.toString(),
+                                title = if (it == 'A') getRandomString(70) else it.toString(),
                                 from = LocalTimeDto(13, 40),
                                 to = LocalTimeDto(14, 40),
                                 date = LocalDateDto(2020, 11, 2),
@@ -127,22 +102,11 @@ class RidingLessonDayRepository @Inject constructor(
         )
     }
 
-    fun getRandomString(length: Int = 10): String {
+    private fun getRandomString(length: Int = 10): String {
         val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
         return (1..length)
             .map { allowedChars.random() }
             .joinToString("")
-    }
-
-
-    suspend fun book(id: String): Result<ApiCall.Error, BookRidingLessonInDto> {
-        return Result.Success(BookRidingLessonInDto("", id))
-        // return executeBodyCall { api.bookLesson(id) }
-    }
-
-    suspend fun cancel(id: String): Result<ApiCall.Error, CancelRidingLessonInDto> {
-        return Result.Success(CancelRidingLessonInDto("", id))
-        //return executeBodyCall { api.cancelLesson(id) }
     }
 }
 

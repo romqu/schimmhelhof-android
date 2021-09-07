@@ -6,6 +6,7 @@ import de.romqu.schimmelhof_android.data.shared.ApiCall
 import de.romqu.schimmelhof_android.shared.Result
 import de.romqu.schimmelhofandroid.sql.RidingLessonEntity
 import de.romqu.schimmelhofandroid.sql.RidingLessonEntityQueries
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,8 +23,15 @@ class RidingLessonRepository @Inject constructor(
         dao.update(state, action, id)
     }
 
-    suspend fun book(id: String): Result<ApiCall.Error, BookRidingLessonInDto> {
-        return Result.Success(BookRidingLessonInDto("", id))
+    suspend fun book(remoteId: String): Result<ApiCall.Error, BookRidingLessonInDto> {
+        delay(1000)
+        return Result.Success(BookRidingLessonInDto("", remoteId))
+        // return executeBodyCall { api.bookLesson(id) }
+    }
+
+    suspend fun cancel(remoteId: String): Result<ApiCall.Error, BookRidingLessonInDto> {
+        delay(1000)
+        return Result.Success(BookRidingLessonInDto("", remoteId))
         // return executeBodyCall { api.bookLesson(id) }
     }
 }

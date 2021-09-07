@@ -9,11 +9,25 @@ import javax.inject.Inject
 
 class ApiCallDelegate @Inject constructor() : ApiCall {
 
-    override suspend fun <T> executeBodyCall(call: suspend () -> Response<T>): Result<ApiCall.Error, T> =
-        executeCall(call).map { it.data }
+    override suspend fun <T> executeBodyCall(
+        call: suspend () -> Response<T>,
+    ): Result<ApiCall.Error, T> = executeCall(call).map { it.data }
 
+    override suspend fun executeEmptyBodyCall(
+        call: suspend () -> Response<Unit>,
+    ): Result<ApiCall.Error, Unit> = executeCall(call).doOn(
+        { Result.Success(Unit) },
+        { error ->
+            when (error) {
+                ApiCall.Error.BodyIsNull -> Result.Success(Unit)
+                else -> Result.Failure(error)
+            }
+        },
+    )
 
-    override suspend fun <T> executeCall(call: suspend () -> Response<T>): Result<ApiCall.Error, ApiCall.Response<T>> =
+    override suspend fun <T> executeCall(
+        call: suspend () -> Response<T>,
+    ): Result<ApiCall.Error, ApiCall.Response<T>> =
         try {
             val response = call()
             val body = response.body()
@@ -30,7 +44,7 @@ class ApiCallDelegate @Inject constructor() : ApiCall {
                         Result.Failure(ApiCall.Error.NotSuccessful(errorMessage, response.code()))
                     }
                 } else {
-                    Result.Failure(ApiCall.Error.BodyIsNull())
+                    Result.Failure(ApiCall.Error.BodyIsNull)
                 }
             } else {
                 Result.Failure(
@@ -40,7 +54,6 @@ class ApiCallDelegate @Inject constructor() : ApiCall {
                     )
                 )
             }
-
         } catch (ex: IOException) {
             Result.Failure(ApiCall.Error.IO(ex.toString()))
         }
@@ -54,6 +67,4 @@ class ApiCallDelegate @Inject constructor() : ApiCall {
 
     private fun <T> getErrorMessageField(body: T?): Field =
         body!!::class.java.getDeclaredField("errorMessage")
-
-
 }

@@ -30,17 +30,18 @@ class LoadInitialLessonDaysService @Inject constructor(
 
 
     private fun Result<ApiCall.Error, GetRidingLessonDaysOutDto>.processLessonDays()
-            : Result<ApiCall.Error, Unit> = map { getDayDto ->
-        database.transaction {
-            lessonDayRepository.delete()
-            getDayDto.ridingLessonDayDtos.map { dayDto ->
-                val date = LocalDate.of(
-                    dayDto.date!!.year,
-                    dayDto.date.month,
-                    dayDto.date.day
-                )
-                val dayEntity = RidingLessonDayEntity(
-                    id = 0,
+            : Result<ApiCall.Error, Unit> =
+        map { getDayDto ->
+            database.transaction {
+                lessonDayRepository.delete()
+                getDayDto.ridingLessonDayDtos.map { dayDto ->
+                    val date = LocalDate.of(
+                        dayDto.date!!.year,
+                        dayDto.date.month,
+                        dayDto.date.day
+                    )
+                    val dayEntity = RidingLessonDayEntity(
+                        id = 0,
                     weekday = WeekdayEntity.valueOf(dayDto.weekday.name),
                     date = date,
                 )

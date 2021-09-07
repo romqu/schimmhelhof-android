@@ -14,9 +14,10 @@ import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import de.romqu.schimmelhof_android.R
 import de.romqu.schimmelhof_android.databinding.FragmentShowRidingLessonsBinding
-import de.romqu.schimmelhof_android.presentation.ridinglessonlist.book.BookLessonLayoutFactory
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.clicked.ClickedLessonLayoutFactory
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.day.RidingLessonDayListAdapter
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.lesson.RidingLessonItem
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.logout.LogoutLayoutFactory
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.util.attachSnapHelperWithListener
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -36,7 +37,10 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
     lateinit var onItemClickChannel: MutableSharedFlow<RidingLessonItem>
 
     @Inject
-    lateinit var bookLayoutFactory: BookLessonLayoutFactory
+    lateinit var clickedLayoutFactory: ClickedLessonLayoutFactory
+
+    @Inject
+    lateinit var logoutLayoutFactory: LogoutLayoutFactory
 
     private val lessonsAdapter by lazy {
         RidingLessonDayListAdapter(
@@ -85,16 +89,10 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
         }
 
         lifecycleScope.launchWhenCreated {
-            viewModel.scrollToPosition.collect {
-                binding.ridingLessonDayParentRcv.scrollToPosition(it)
-            }
-        }
-
-        lifecycleScope.launchWhenCreated {
             viewModel.dispatchListUpdates.collect {
-                lessonsAdapter.updateData(it.list)
-                it.diffResult?.dispatchUpdatesTo(lessonsAdapter)
-                viewModel.onListDispatched()
+                lessonsAdapter.updateData(it)
+                //it.diffResult?.dispatchUpdatesTo(lessonsAdapter)
+                lessonsAdapter.notifyChange()
             }
         }
 
@@ -104,7 +102,8 @@ class ShowRidingLessonsFragment : Fragment(R.layout.fragment_login) {
             }
         }
 
-        bookLayoutFactory.create(lifecycleScope, requireContext(), viewModel)
+        clickedLayoutFactory.create(lifecycleScope, requireContext(), viewModel)
+        logoutLayoutFactory.create(viewModel, binding)
     }
 
     override fun onDestroyView() {

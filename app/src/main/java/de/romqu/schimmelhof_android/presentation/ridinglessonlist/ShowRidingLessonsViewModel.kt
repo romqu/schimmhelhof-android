@@ -5,12 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.DiffUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
+import de.romqu.schimmelhof_android.data.ridinglesson.RidingLessonActionEntity
 import de.romqu.schimmelhof_android.data.ridinglessonday.RidingLessonDayRepository
+import de.romqu.schimmelhof_android.data.user.UserRepository
 import de.romqu.schimmelhof_android.domain.LoadInitialLessonDaysService
-import de.romqu.schimmelhof_android.presentation.ridinglessonlist.book.BookLessonRunnerFactory
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.clicked.ClickedLessonRunnerFactory
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.day.RidingLessonDayItem
-import de.romqu.schimmelhof_android.presentation.ridinglessonlist.day.RidingLessonDayItemDiffCallback
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.lesson.RidingLessonItem
+import de.romqu.schimmelhof_android.presentation.ridinglessonlist.logout.LogoutRunnerFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -22,15 +24,21 @@ import javax.inject.Named
 @HiltViewModel
 class ShowRidingLessonsViewModel @Inject constructor(
     ridingLessonDayRepository: RidingLessonDayRepository,
+    private val userRepository: UserRepository,
     private val savedStateHandle: SavedStateHandle,
     private val initialService: LoadInitialLessonDaysService,
     @Named(CURRENT_POSITION) private val currentPosition: MutableStateFlow<Int>,
-    bookLessonRunnerFactory: BookLessonRunnerFactory,
+    clickedLessonRunnerFactory: ClickedLessonRunnerFactory,
+    logoutRunnerFactory: LogoutRunnerFactory,
 ) : ViewModel() {
 
     private val onListDispatched = MutableSharedFlow<Unit>()
     val bookLessonRunner by lazy {
-        bookLessonRunnerFactory.create(viewModelScope)
+        clickedLessonRunnerFactory.create(viewModelScope)
+    }
+
+    val logoutLessonRunner by lazy {
+        logoutRunnerFactory.create(viewModelScope)
     }
 
     private val unmodifiedItems = ridingLessonDayRepository.get()
@@ -38,18 +46,28 @@ class ShowRidingLessonsViewModel @Inject constructor(
             entityList.map { entity ->
                 RidingLessonDayItem(
                     entity.day.date,
-                    entity.day.weekday.name,
-                    entity.lessons.map { lesson ->
-                        RidingLessonItem(
-                            title = lesson.title,
-                            state = lesson.state,
-                            id = lesson.id,
-                            remoteId = lesson.remoteId,
-                        )
-                    }
+                    entity.day.weekday.german,
+                    entity.lessons
+                        .filter {
+                            it.action == RidingLessonActionEntity.BOOK
+                                    || it.action == RidingLessonActionEntity.CANCEL_BOOKING
+                        }
+                        .map { lesson ->
+                            RidingLessonItem(
+                                title = lesson.title,
+                                time = "${lesson.fromTime} - ${lesson.toTime}",
+                                teacher = lesson.teacher,
+                                state = lesson.state,
+                                id = lesson.id,
+                                remoteId = lesson.remoteId,
+                                isEnabled = lesson.action == RidingLessonActionEntity.BOOK,
+                                action = lesson.action,
+                            )
+                        }
                 )
             }
-        }.shareIn(
+        }
+        .shareIn(
             viewModelScope, SharingStarted.Lazily
         )
 
@@ -59,17 +77,13 @@ class ShowRidingLessonsViewModel @Inject constructor(
         currentPosition
     }
 
-    val scrollToPosition = onListDispatched.drop(2).flatMapConcat {
-        lastScrollPosition.take(1)
-    }
-
     val dispatchListUpdates = unmodifiedItems
-        .filter { it.isNotEmpty() }
+/*        .filter { it.isNotEmpty() }
         .scan(DispatchListUpdate()) { previous, next ->
             val diffResult =
                 DiffUtil.calculateDiff(RidingLessonDayItemDiffCallback(previous.list, next))
             DispatchListUpdate(next, diffResult)
-        }.filter { it.list.isNotEmpty() }
+        }.filter { it.list.isNotEmpty() }*/
 
     class DispatchListUpdate(
         val list: List<RidingLessonDayItem> = emptyList(),
@@ -101,6 +115,12 @@ class ShowRidingLessonsViewModel @Inject constructor(
     fun onListDispatched() {
         viewModelScope.launch {
             onListDispatched.emit(Unit)
+        }
+    }
+
+    fun onLogoutClick() {
+        viewModelScope.launch {
+            userRepository.logout()
         }
     }
 }

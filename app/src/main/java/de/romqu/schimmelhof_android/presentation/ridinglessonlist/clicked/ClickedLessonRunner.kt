@@ -1,11 +1,10 @@
-package de.romqu.schimmelhof_android.presentation.ridinglessonlist.book
+package de.romqu.schimmelhof_android.presentation.ridinglessonlist.clicked
 
-import android.util.Log
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import de.romqu.schimmelhof_android.data.shared.ApiCall
-import de.romqu.schimmelhof_android.domain.BookRidingLessonService
+import de.romqu.schimmelhof_android.domain.ProcessSelectedRidingLessonService
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.ON_ITEM_CLICK
 import de.romqu.schimmelhof_android.presentation.ridinglessonlist.lesson.RidingLessonItem
 import de.romqu.schimmelhof_android.shared.Result
@@ -15,8 +14,8 @@ import kotlinx.coroutines.flow.*
 import javax.inject.Named
 
 @ExperimentalCoroutinesApi
-class BookLessonRunner @AssistedInject constructor(
-    private val bookRidingLessonService: BookRidingLessonService,
+class ClickedLessonRunner @AssistedInject constructor(
+    private val processSelectedRidingLessonService: ProcessSelectedRidingLessonService,
     @Named(ON_ITEM_CLICK)
     private val onItemClickChannel: MutableSharedFlow<RidingLessonItem>,
     @Assisted
@@ -25,8 +24,7 @@ class BookLessonRunner @AssistedInject constructor(
 
     val result: SharedFlow<Result<ApiCall.Error, Unit>> =
         onItemClickChannel.map { item ->
-            Log.d("AAAAA", """$item $onItemClickChannel""")
-            bookRidingLessonService.execute(item.id, item.remoteId)
+            processSelectedRidingLessonService.execute(item.id, item.remoteId, item.action)
         }.shareIn(scope, SharingStarted.Lazily)
 
     val showSuccessMessage: Flow<String> = result.filterIsInstance<Result.Success<*>>()
@@ -39,6 +37,6 @@ class BookLessonRunner @AssistedInject constructor(
 }
 
 @AssistedFactory
-interface BookLessonRunnerFactory {
-    fun create(scope: CoroutineScope): BookLessonRunner
+interface ClickedLessonRunnerFactory {
+    fun create(scope: CoroutineScope): ClickedLessonRunner
 }

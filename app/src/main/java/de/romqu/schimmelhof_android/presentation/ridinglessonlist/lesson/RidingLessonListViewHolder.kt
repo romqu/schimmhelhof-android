@@ -1,6 +1,5 @@
 package de.romqu.schimmelhof_android.presentation.ridinglessonlist.lesson
 
-import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import de.romqu.schimmelhof_android.R
@@ -14,7 +13,6 @@ class RidingLessonListViewHolder(
 
     init {
         binding.root.setOnClickListener {
-            Log.d("AAAAA", "CLICK")
             onItemClick(bindingAdapterPosition)
         }
     }
@@ -28,13 +26,18 @@ class RidingLessonListViewHolder(
             AVAILABLE -> R.color.white
         }
 
-        binding.childRidingCardView.setCardBackgroundColor(ContextCompat.getColor(
-            binding.root.context,
-            colorId)
-        )
+        binding.childRidingCardView.apply {
+            setCardBackgroundColor(ContextCompat.getColor(
+                binding.root.context,
+                colorId)
+            )
+            isEnabled = item.isEnabled
+        }
 
         binding.apply {
-            ridingTextView.text = item.title
+            titleTextView.text = item.title
+            teacherTextView.text = item.teacher
+            timeTextView.text = item.time
         }
     }
 }

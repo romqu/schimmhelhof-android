@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 
 
 class RidingLessonDayListViewHolder(
-    private val binding: ItemParentRidinglessonBinding,
+    val binding: ItemParentRidinglessonBinding,
     private val onItemClickChannel: MutableSharedFlow<RidingLessonItem>,
 ) :
     RecyclerView.ViewHolder(binding.root) {

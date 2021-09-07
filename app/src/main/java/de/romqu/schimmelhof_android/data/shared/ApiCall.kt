@@ -7,6 +7,7 @@ import retrofit2.Response
 interface ApiCall {
     suspend fun <T> executeCall(call: suspend () -> retrofit2.Response<T>): Result<Error, Response<T>>
     suspend fun <T> executeBodyCall(call: suspend () -> retrofit2.Response<T>): Result<Error, T>
+    suspend fun executeEmptyBodyCall(call: suspend () -> retrofit2.Response<Unit>): Result<Error, Unit>
 
     class Response<T>(
         val data: T,
@@ -15,7 +16,7 @@ interface ApiCall {
 
     sealed class Error(val message: String) {
         class NotSuccessful(message: String, statusCode: Int) : Error(message)
-        class BodyIsNull : Error("")
+        object BodyIsNull : Error("")
         class IO(message: String) : Error(message)
     }
 }

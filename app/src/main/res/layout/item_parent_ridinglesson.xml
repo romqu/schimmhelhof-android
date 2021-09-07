@@ -9,7 +9,9 @@
         android:id="@+id/ridingLessonDayChildRcv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:orientation="vertical"
-        tools:listitem="@layout/item_child_ridinglesson" />
+        tools:itemCount="10"
+        tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        tools:listitem="@layout/item_child_ridinglesson"
+        tools:orientation="vertical" />
 
 </LinearLayout>

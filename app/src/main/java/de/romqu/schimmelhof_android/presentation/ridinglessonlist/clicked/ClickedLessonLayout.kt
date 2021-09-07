@@ -1,4 +1,4 @@
-package de.romqu.schimmelhof_android.presentation.ridinglessonlist.book
+package de.romqu.schimmelhof_android.presentation.ridinglessonlist.clicked
 
 import android.content.Context
 import android.widget.Toast
@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.collect
 
 
 @ExperimentalCoroutinesApi
-class BookLessonLayout
+class ClickedLessonLayout
 @AssistedInject constructor(
     @Assisted private val scope: LifecycleCoroutineScope,
     @Assisted private val context: Context,
@@ -35,10 +35,10 @@ class BookLessonLayout
 }
 
 @AssistedFactory
-interface BookLessonLayoutFactory {
+interface ClickedLessonLayoutFactory {
     fun create(
         scope: LifecycleCoroutineScope,
         context: Context,
         viewModel: ShowRidingLessonsViewModel,
-    ): BookLessonLayout
+    ): ClickedLessonLayout
 }
