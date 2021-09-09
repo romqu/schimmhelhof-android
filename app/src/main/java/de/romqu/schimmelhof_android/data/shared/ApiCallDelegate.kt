@@ -33,7 +33,7 @@ class ApiCallDelegate @Inject constructor() : ApiCall {
             val body = response.body()
 
             if (response.isSuccessful) {
-                if (body != null) {
+                if (body != null && body != Unit) {
                     val field = getErrorMessageField<T>(body)
                     makeFieldAccessible(field)
                     val errorMessage = getErrorMessageFieldValue<T>(field, body)

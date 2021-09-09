@@ -4,6 +4,8 @@ enum class RidingLessonStateEntity {
 
     EXPIRED,
 
+    EXPIRED_BOOKED,
+
     BOOKED_OUT,
 
     WAIT_LIST,

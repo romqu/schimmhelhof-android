@@ -16,20 +16,27 @@ class RidingLessonDayListViewHolder(
 
     fun bind(dayItem: RidingLessonDayItem, recycledViewPool: RecyclerView.RecycledViewPool) {
 
-        val linearLayoutManager = LinearLayoutManager(
-            binding.ridingLessonDayChildRcv.context,
-            LinearLayoutManager.VERTICAL,
-            false)
+        if (binding.ridingLessonDayChildRcv.adapter == null) {
+            val linearLayoutManager = LinearLayoutManager(
+                binding.ridingLessonDayChildRcv.context,
+                LinearLayoutManager.VERTICAL,
+                false)
 
-        linearLayoutManager.initialPrefetchItemCount = dayItem.lessons.size
+            linearLayoutManager.initialPrefetchItemCount = dayItem.lessons.size
 
-        val childAdapter =
-            RidingLessonListAdapter(dayItem.lessons.toMutableList(), onItemClickChannel)
+            val childAdapter =
+                RidingLessonListAdapter(dayItem.lessons.toMutableList(), onItemClickChannel)
 
-        binding.ridingLessonDayChildRcv.apply {
-            layoutManager = linearLayoutManager
-            adapter = childAdapter
-            setRecycledViewPool(recycledViewPool)
+
+            binding.ridingLessonDayChildRcv.apply {
+                layoutManager = linearLayoutManager
+                adapter = childAdapter
+                setRecycledViewPool(recycledViewPool)
+            }
+        } else {
+            val adapter = binding.ridingLessonDayChildRcv.adapter as RidingLessonListAdapter
+            adapter.updateItems(dayItem.lessons)
+            adapter.notifyChanged()
         }
     }
 }

@@ -35,8 +35,8 @@ class ProcessSelectedRidingLessonService @Inject constructor(
                 .map {
                     lessonRepository.update(
                         id,
-                        RidingLessonStateEntity.BOOKED,
-                        CANCEL_BOOKING
+                        RidingLessonStateEntity.AVAILABLE,
+                        BOOK
                     )
                 }
             CANCEL_WAIT_LIST -> Result.Success(Unit)

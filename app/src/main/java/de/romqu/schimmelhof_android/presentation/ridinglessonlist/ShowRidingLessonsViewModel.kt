@@ -37,7 +37,7 @@ class ShowRidingLessonsViewModel @Inject constructor(
         clickedLessonRunnerFactory.create(viewModelScope)
     }
 
-    val logoutLessonRunner by lazy {
+    val logoutRunner by lazy {
         logoutRunnerFactory.create(viewModelScope)
     }
 
@@ -60,7 +60,8 @@ class ShowRidingLessonsViewModel @Inject constructor(
                                 state = lesson.state,
                                 id = lesson.id,
                                 remoteId = lesson.remoteId,
-                                isEnabled = lesson.action == RidingLessonActionEntity.BOOK,
+                                isEnabled = lesson.action == RidingLessonActionEntity.BOOK
+                                        || lesson.action == RidingLessonActionEntity.CANCEL_BOOKING,
                                 action = lesson.action,
                             )
                         }

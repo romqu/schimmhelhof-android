@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.romqu.schimmelhof_android.domain.LoginService
+import de.romqu.schimmelhof_android.presentation.shared.NAVIGATION
 import de.romqu.schimmelhof_android.presentation.shared.NavigatorDestination
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,7 +20,7 @@ import javax.inject.Named
 class LoginViewModel @Inject constructor(
     private val loginService: LoginService,
     private val savedStateHandle: SavedStateHandle,
-    @Named("q")
+    @Named(NAVIGATION)
     private val stream: MutableSharedFlow<NavigatorDestination>,
 ) : ViewModel() {
 

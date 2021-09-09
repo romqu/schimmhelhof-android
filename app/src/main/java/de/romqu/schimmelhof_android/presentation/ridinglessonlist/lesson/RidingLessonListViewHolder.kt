@@ -22,8 +22,9 @@ class RidingLessonListViewHolder(
             EXPIRED -> R.color.white
             BOOKED_OUT -> R.color.white
             WAIT_LIST -> R.color.white
-            BOOKED -> R.color.purple_200
+            BOOKED -> R.color.waveColor
             AVAILABLE -> R.color.white
+            EXPIRED_BOOKED -> R.color.white
         }
 
         binding.childRidingCardView.apply {

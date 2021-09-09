@@ -19,7 +19,7 @@ class LogoutLayout
 
     init {
         binding.logoutTextView.setOnClickListener {
-            viewModel.logoutLessonRunner.onLogoutClick()
+            viewModel.logoutRunner.onLogoutClick()
         }
     }
 }

@@ -29,11 +29,11 @@ class ClickedLessonRunner @AssistedInject constructor(
 
     val showSuccessMessage: Flow<String> = result.filterIsInstance<Result.Success<*>>()
         .map {
-            "Success"
+            "Hat geklappt"
         }
 
     val showErrorMessage: Flow<String> = result.filterIsInstance<Result.Failure<*>>()
-        .map { "Failure" }
+        .map { "Nicht geklappt" }
 }
 
 @AssistedFactory

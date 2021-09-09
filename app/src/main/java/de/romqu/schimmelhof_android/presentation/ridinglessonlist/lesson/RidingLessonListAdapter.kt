@@ -49,6 +49,15 @@ class RidingLessonListAdapter(
         }
     }
 
+    fun updateItems(list: List<RidingLessonItem>) {
+        items.clear()
+        items.addAll(list)
+    }
+
+    fun notifyChanged() {
+        notifyDataSetChanged()
+    }
+
     override fun onBindViewHolder(
         holder: RecyclerView.ViewHolder,
         position: Int,
